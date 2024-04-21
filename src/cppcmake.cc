@@ -12,14 +12,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include <errno.h>
-#include <limits.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
+#include <cerrno>
+#include <climits>
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
 
 #include <algorithm>
-#include <cstdlib>
 
 #ifdef _WIN32
 #include "getopt.h"
@@ -33,24 +32,20 @@
 #include <unistd.h>
 #endif
 
-#include "browse.h"
-#include "build.h"
-#include "build_log.h"
-#include "deps_log.h"
-#include "clean.h"
-#include "debug_flags.h"
-#include "depfile_parser.h"
-#include "disk_interface.h"
-#include "graph.h"
-#include "graphviz.h"
-#include "json.h"
-#include "manifest_parser.h"
-#include "metrics.h"
-#include "missing_deps.h"
-#include "state.h"
-#include "status.h"
-#include "util.h"
-#include "version.h"
+#include "../deps/build.h"
+#include "../deps/build_log.h"
+#include "../deps/deps_log.h"
+#include "../deps/clean.h"
+#include "../deps/debug_flags.h"
+#include "../deps/disk_interface.h"
+#include "../deps/graphviz.h"
+#include "../deps/json.h"
+#include "../deps/manifest_parser.h"
+#include "../deps/metrics.h"
+#include "../deps/missing_deps.h"
+#include "../deps/state.h"
+#include "../deps/status.h"
+#include "../deps/version.h"
 
 using namespace std;
 
@@ -81,15 +76,15 @@ struct Options {
   bool phony_cycle_should_err;
 };
 
-/// The Ninja main() loads up a series of data structures; various tools need
+/// The CppCmake main() loads up a series of data structures; various tools need
 /// to poke into these, so store them as fields on an object.
-struct NinjaMain : public BuildLogUser {
-  NinjaMain(const char* ninja_command, const BuildConfig& config) :
-      ninja_command_(ninja_command), config_(config),
-      start_time_millis_(GetTimeMillis()) {}
+struct CppCmakeMain : public BuildLogUser {
+  CppCmakeMain(const char* cppcmake_command, const BuildConfig& config) :
+          cppcmake_command_(cppcmake_command), config_(config),
+          start_time_millis_(GetTimeMillis()) {}
 
-  /// Command line used to run Ninja.
-  const char* ninja_command_;
+  /// Command line used to run CppCmake.
+  const char* cppcmake_command_;
 
   /// Build configuration set from flags (e.g. parallelism).
   const BuildConfig& config_;
@@ -107,7 +102,7 @@ struct NinjaMain : public BuildLogUser {
   DepsLog deps_log_;
 
   /// The type of functions that are the entry points to tools (subcommands).
-  typedef int (NinjaMain::*ToolFunc)(const Options*, int, char**);
+  typedef int (CppCmakeMain::*ToolFunc)(const Options*, int, char**);
 
   /// Get the Node for a given command-line path, handling features like
   /// spell correction.
@@ -201,7 +196,7 @@ struct Tool {
     /// the current working directory (as early as possible).
     RUN_AFTER_FLAGS,
 
-    /// Run after loading build.ninja.
+    /// Run after loading build.cppcmake.
     RUN_AFTER_LOAD,
 
     /// Run after loading the build/deps logs.
@@ -209,18 +204,18 @@ struct Tool {
   } when;
 
   /// Implementation of the tool.
-  NinjaMain::ToolFunc func;
+  CppCmakeMain::ToolFunc func;
 };
 
 /// Print usage information.
 void Usage(const BuildConfig& config) {
   fprintf(stderr,
-"usage: ninja [options] [targets...]\n"
+"usage: cppcmake [options] [targets...]\n"
 "\n"
 "if targets are unspecified, builds the 'default' target (see manual).\n"
 "\n"
 "options:\n"
-"  --version      print ninja version (\"%s\")\n"
+"  --version      print cppcmake version (\"%s\")\n"
 "  -v, --verbose  show all command lines while building\n"
 "  --quiet        don't show progress status, just command output\n"
 "\n"
@@ -236,7 +231,7 @@ void Usage(const BuildConfig& config) {
 "  -t TOOL  run a subtool (use '-t list' to list subtools)\n"
 "    terminates toplevel options; further flags are passed to the tool\n"
 "  -w FLAG  adjust warnings (use '-w list' to list warnings)\n",
-          kNinjaVersion, config.parallelism);
+          kCppCmakeVersion, config.parallelism);
 }
 
 /// Choose a default value for the -j (parallelism) flag.
@@ -254,8 +249,8 @@ int GuessParallelism() {
 
 /// Rebuild the build manifest, if necessary.
 /// Returns true if the manifest was rebuilt.
-bool NinjaMain::RebuildManifest(const char* input_file, string* err,
-                                Status* status) {
+bool CppCmakeMain::RebuildManifest(const char* input_file, string* err,
+                                   Status* status) {
   string path = input_file;
   if (path.empty()) {
     *err = "empty path";
@@ -290,7 +285,7 @@ bool NinjaMain::RebuildManifest(const char* input_file, string* err,
   return true;
 }
 
-void NinjaMain::ParsePreviousElapsedTimes() {
+void CppCmakeMain::ParsePreviousElapsedTimes() {
   for (Edge* edge : state_.edges_) {
     for (Node* out : edge->outputs_) {
       BuildLog::LogEntry* log_entry = build_log_.LookupByOutput(out->path());
@@ -303,7 +298,7 @@ void NinjaMain::ParsePreviousElapsedTimes() {
   }
 }
 
-Node* NinjaMain::CollectTarget(const char* cpath, string* err) {
+Node* CppCmakeMain::CollectTarget(const char* cpath, string* err) {
   string path = cpath;
   if (path.empty()) {
     *err = "empty path";
@@ -343,9 +338,9 @@ Node* NinjaMain::CollectTarget(const char* cpath, string* err) {
     *err =
         "unknown target '" + Node::PathDecanonicalized(path, slash_bits) + "'";
     if (path == "clean") {
-      *err += ", did you mean 'ninja -t clean'?";
+      *err += ", did you mean 'cppcmake -t clean'?";
     } else if (path == "help") {
-      *err += ", did you mean 'ninja -h'?";
+      *err += ", did you mean 'cppcmake -h'?";
     } else {
       Node* suggestion = state_.SpellcheckNode(path);
       if (suggestion) {
@@ -356,8 +351,8 @@ Node* NinjaMain::CollectTarget(const char* cpath, string* err) {
   }
 }
 
-bool NinjaMain::CollectTargetsFromArgs(int argc, char* argv[],
-                                       vector<Node*>* targets, string* err) {
+bool CppCmakeMain::CollectTargetsFromArgs(int argc, char* argv[],
+                                          vector<Node*>* targets, string* err) {
   if (argc == 0) {
     *targets = state_.DefaultNodes(err);
     return err->empty();
@@ -372,7 +367,7 @@ bool NinjaMain::CollectTargetsFromArgs(int argc, char* argv[],
   return true;
 }
 
-int NinjaMain::ToolGraph(const Options* options, int argc, char* argv[]) {
+int CppCmakeMain::ToolGraph(const Options* options, int argc, char* argv[]) {
   vector<Node*> nodes;
   string err;
   if (!CollectTargetsFromArgs(argc, argv, &nodes, &err)) {
@@ -389,7 +384,7 @@ int NinjaMain::ToolGraph(const Options* options, int argc, char* argv[]) {
   return 0;
 }
 
-int NinjaMain::ToolQuery(const Options* options, int argc, char* argv[]) {
+int CppCmakeMain::ToolQuery(const Options* options, int argc, char* argv[]) {
   if (argc == 0) {
     Error("expected a target to query");
     return 1;
@@ -452,21 +447,21 @@ int NinjaMain::ToolQuery(const Options* options, int argc, char* argv[]) {
   return 0;
 }
 
-#if defined(NINJA_HAVE_BROWSE)
-int NinjaMain::ToolBrowse(const Options* options, int argc, char* argv[]) {
-  RunBrowsePython(&state_, ninja_command_, options->input_file, argc, argv);
+#if defined(CPPCMAKE_HAVE_BROWSE)
+int CppCmakeMain::ToolBrowse(const Options* options, int argc, char* argv[]) {
+//  RunBrowsePython(&state_, cppcmake_command_, options->input_file, argc, argv);
   // If we get here, the browse failed.
   return 1;
 }
 #else
-int NinjaMain::ToolBrowse(const Options*, int, char**) {
+int CppCmakeMain::ToolBrowse(const Options*, int, char**) {
   Fatal("browse tool not supported on this platform");
   return 1;
 }
 #endif
 
 #if defined(_WIN32)
-int NinjaMain::ToolMSVC(const Options* options, int argc, char* argv[]) {
+int CppCmakeMain::ToolMSVC(const Options* options, int argc, char* argv[]) {
   // Reset getopt: push one argument onto the front of argv, reset optind.
   argc++;
   argv--;
@@ -541,7 +536,7 @@ int ToolTargetsList(State* state) {
   return 0;
 }
 
-int NinjaMain::ToolDeps(const Options* options, int argc, char** argv) {
+int CppCmakeMain::ToolDeps(const Options* options, int argc, char** argv) {
   vector<Node*> nodes;
   if (argc == 0) {
     for (vector<Node*>::const_iterator ni = deps_log_.nodes().begin();
@@ -581,7 +576,7 @@ int NinjaMain::ToolDeps(const Options* options, int argc, char** argv) {
   return 0;
 }
 
-int NinjaMain::ToolMissingDeps(const Options* options, int argc, char** argv) {
+int CppCmakeMain::ToolMissingDeps(const Options* options, int argc, char** argv) {
   vector<Node*> nodes;
   string err;
   if (!CollectTargetsFromArgs(argc, argv, &nodes, &err)) {
@@ -601,7 +596,7 @@ int NinjaMain::ToolMissingDeps(const Options* options, int argc, char** argv) {
   return 0;
 }
 
-int NinjaMain::ToolTargets(const Options* options, int argc, char* argv[]) {
+int CppCmakeMain::ToolTargets(const Options* options, int argc, char* argv[]) {
   int depth = 1;
   if (argc >= 1) {
     string mode = argv[0];
@@ -641,7 +636,7 @@ int NinjaMain::ToolTargets(const Options* options, int argc, char* argv[]) {
   }
 }
 
-int NinjaMain::ToolRules(const Options* options, int argc, char* argv[]) {
+int CppCmakeMain::ToolRules(const Options* options, int argc, char* argv[]) {
   // Parse options.
 
   // The rules tool uses getopt, and expects argv[0] to contain the name of
@@ -660,7 +655,7 @@ int NinjaMain::ToolRules(const Options* options, int argc, char* argv[]) {
       break;
     case 'h':
     default:
-      printf("usage: ninja -t rules [options]\n"
+      printf("usage: cppcmake -t rules [options]\n"
              "\n"
              "options:\n"
              "  -d     also print the description of the rule\n"
@@ -692,9 +687,9 @@ int NinjaMain::ToolRules(const Options* options, int argc, char* argv[]) {
 }
 
 #ifdef _WIN32
-int NinjaMain::ToolWinCodePage(const Options* options, int argc, char* argv[]) {
+int CppCmakeMain::ToolWinCodePage(const Options* options, int argc, char* argv[]) {
   if (argc != 0) {
-    printf("usage: ninja -t wincodepage\n");
+    printf("usage: cppcmake -t wincodepage\n");
     return 1;
   }
   printf("Build file encoding: %s\n", GetACP() == CP_UTF8? "UTF-8" : "ANSI");
@@ -719,7 +714,7 @@ void PrintCommands(Edge* edge, EdgeSet* seen, PrintCommandMode mode) {
     puts(edge->EvaluateCommand().c_str());
 }
 
-int NinjaMain::ToolCommands(const Options* options, int argc, char* argv[]) {
+int CppCmakeMain::ToolCommands(const Options* options, int argc, char* argv[]) {
   // The commands tool uses getopt, and expects argv[0] to contain the name of
   // the tool, i.e. "commands".
   ++argc;
@@ -736,7 +731,7 @@ int NinjaMain::ToolCommands(const Options* options, int argc, char* argv[]) {
       break;
     case 'h':
     default:
-      printf("usage: ninja -t commands [options] [targets]\n"
+      printf("usage: cppcmake -t commands [options] [targets]\n"
 "\n"
 "options:\n"
 "  -s     only print the final command to build [target], not the whole chain\n"
@@ -777,7 +772,7 @@ void CollectInputs(Edge* edge, std::set<Edge*>* seen,
   }
 }
 
-int NinjaMain::ToolInputs(const Options* options, int argc, char* argv[]) {
+int CppCmakeMain::ToolInputs(const Options* options, int argc, char* argv[]) {
   // The inputs tool uses getopt, and expects argv[0] to contain the name of
   // the tool, i.e. "inputs".
   argc++;
@@ -827,7 +822,7 @@ int NinjaMain::ToolInputs(const Options* options, int argc, char* argv[]) {
   return 0;
 }
 
-int NinjaMain::ToolClean(const Options* options, int argc, char* argv[]) {
+int CppCmakeMain::ToolClean(const Options* options, int argc, char* argv[]) {
   // The clean tool uses getopt, and expects argv[0] to contain the name of
   // the tool, i.e. "clean".
   argc++;
@@ -848,10 +843,10 @@ int NinjaMain::ToolClean(const Options* options, int argc, char* argv[]) {
       break;
     case 'h':
     default:
-      printf("usage: ninja -t clean [options] [targets]\n"
+      printf("usage: cppcmake -t clean [options] [targets]\n"
 "\n"
 "options:\n"
-"  -g     also clean files marked as ninja generator output\n"
+"  -g     also clean files marked as cppcmake generator output\n"
 "  -r     interpret targets as a list of rules to clean instead\n"
              );
     return 1;
@@ -876,7 +871,7 @@ int NinjaMain::ToolClean(const Options* options, int argc, char* argv[]) {
   }
 }
 
-int NinjaMain::ToolCleanDead(const Options* options, int argc, char* argv[]) {
+int CppCmakeMain::ToolCleanDead(const Options* options, int argc, char* argv[]) {
   Cleaner cleaner(&state_, config_, &disk_interface_);
   return cleaner.CleanDead(build_log_.entries());
 }
@@ -932,8 +927,8 @@ void printCompdb(const char* const directory, const Edge* const edge,
   printf("\"\n  }");
 }
 
-int NinjaMain::ToolCompilationDatabase(const Options* options, int argc,
-                                       char* argv[]) {
+int CppCmakeMain::ToolCompilationDatabase(const Options* options, int argc,
+                                          char* argv[]) {
   // The compdb tool uses getopt, and expects argv[0] to contain the name of
   // the tool, i.e. "compdb".
   argc++;
@@ -952,7 +947,7 @@ int NinjaMain::ToolCompilationDatabase(const Options* options, int argc,
       case 'h':
       default:
         printf(
-            "usage: ninja -t compdb [options] [rules]\n"
+            "usage: cppcmake -t compdb [options] [rules]\n"
             "\n"
             "options:\n"
             "  -x     expand @rspfile style response file invocations\n"
@@ -1005,7 +1000,7 @@ int NinjaMain::ToolCompilationDatabase(const Options* options, int argc,
   return 0;
 }
 
-int NinjaMain::ToolRecompact(const Options* options, int argc, char* argv[]) {
+int CppCmakeMain::ToolRecompact(const Options* options, int argc, char* argv[]) {
   if (!EnsureBuildDirExists())
     return 1;
 
@@ -1016,7 +1011,7 @@ int NinjaMain::ToolRecompact(const Options* options, int argc, char* argv[]) {
   return 0;
 }
 
-int NinjaMain::ToolRestat(const Options* options, int argc, char* argv[]) {
+int CppCmakeMain::ToolRestat(const Options* options, int argc, char* argv[]) {
   // The restat tool uses getopt, and expects argv[0] to contain the name of the
   // tool, i.e. "restat"
   argc++;
@@ -1028,7 +1023,7 @@ int NinjaMain::ToolRestat(const Options* options, int argc, char* argv[]) {
     switch (opt) {
     case 'h':
     default:
-      printf("usage: ninja -t restat [outputs]\n");
+      printf("usage: cppcmake -t restat [outputs]\n");
       return 1;
     }
   }
@@ -1038,7 +1033,7 @@ int NinjaMain::ToolRestat(const Options* options, int argc, char* argv[]) {
   if (!EnsureBuildDirExists())
     return 1;
 
-  string log_path = ".ninja_log";
+  string log_path = ".cppcmake_log";
   if (!build_dir_.empty())
     log_path = build_dir_ + "/" + log_path;
 
@@ -1074,7 +1069,7 @@ int NinjaMain::ToolRestat(const Options* options, int argc, char* argv[]) {
   return EXIT_SUCCESS;
 }
 
-int NinjaMain::ToolUrtle(const Options* options, int argc, char** argv) {
+int CppCmakeMain::ToolUrtle(const Options* options, int argc, char** argv) {
   // RLE encoded.
   const char* urtle =
 " 13 ,3;2!2;\n8 ,;<11!;\n5 `'<10!(2`'2!\n11 ,6;, `\\. `\\9 .,c13$ec,.\n6 "
@@ -1101,52 +1096,52 @@ int NinjaMain::ToolUrtle(const Options* options, int argc, char** argv) {
 }
 
 /// Find the function to execute for \a tool_name and return it via \a func.
-/// Returns a Tool, or NULL if Ninja should exit.
+/// Returns a Tool, or NULL if CppCmake should exit.
 const Tool* ChooseTool(const string& tool_name) {
   static const Tool kTools[] = {
     { "browse", "browse dependency graph in a web browser",
-      Tool::RUN_AFTER_LOAD, &NinjaMain::ToolBrowse },
+      Tool::RUN_AFTER_LOAD, &CppCmakeMain::ToolBrowse },
 #ifdef _WIN32
     { "msvc", "build helper for MSVC cl.exe (DEPRECATED)",
-      Tool::RUN_AFTER_FLAGS, &NinjaMain::ToolMSVC },
+      Tool::RUN_AFTER_FLAGS, &CppCmakeMain::ToolMSVC },
 #endif
     { "clean", "clean built files",
-      Tool::RUN_AFTER_LOAD, &NinjaMain::ToolClean },
+      Tool::RUN_AFTER_LOAD, &CppCmakeMain::ToolClean },
     { "commands", "list all commands required to rebuild given targets",
-      Tool::RUN_AFTER_LOAD, &NinjaMain::ToolCommands },
+      Tool::RUN_AFTER_LOAD, &CppCmakeMain::ToolCommands },
     { "inputs", "list all inputs required to rebuild given targets",
-      Tool::RUN_AFTER_LOAD, &NinjaMain::ToolInputs},
+      Tool::RUN_AFTER_LOAD, &CppCmakeMain::ToolInputs},
     { "deps", "show dependencies stored in the deps log",
-      Tool::RUN_AFTER_LOGS, &NinjaMain::ToolDeps },
+      Tool::RUN_AFTER_LOGS, &CppCmakeMain::ToolDeps },
     { "missingdeps", "check deps log dependencies on generated files",
-      Tool::RUN_AFTER_LOGS, &NinjaMain::ToolMissingDeps },
+      Tool::RUN_AFTER_LOGS, &CppCmakeMain::ToolMissingDeps },
     { "graph", "output graphviz dot file for targets",
-      Tool::RUN_AFTER_LOAD, &NinjaMain::ToolGraph },
+      Tool::RUN_AFTER_LOAD, &CppCmakeMain::ToolGraph },
     { "query", "show inputs/outputs for a path",
-      Tool::RUN_AFTER_LOGS, &NinjaMain::ToolQuery },
+      Tool::RUN_AFTER_LOGS, &CppCmakeMain::ToolQuery },
     { "targets",  "list targets by their rule or depth in the DAG",
-      Tool::RUN_AFTER_LOAD, &NinjaMain::ToolTargets },
+      Tool::RUN_AFTER_LOAD, &CppCmakeMain::ToolTargets },
     { "compdb",  "dump JSON compilation database to stdout",
-      Tool::RUN_AFTER_LOAD, &NinjaMain::ToolCompilationDatabase },
-    { "recompact",  "recompacts ninja-internal data structures",
-      Tool::RUN_AFTER_LOAD, &NinjaMain::ToolRecompact },
+      Tool::RUN_AFTER_LOAD, &CppCmakeMain::ToolCompilationDatabase },
+    { "recompact",  "recompacts cppcmake-internal data structures",
+      Tool::RUN_AFTER_LOAD, &CppCmakeMain::ToolRecompact },
     { "restat",  "restats all outputs in the build log",
-      Tool::RUN_AFTER_FLAGS, &NinjaMain::ToolRestat },
+      Tool::RUN_AFTER_FLAGS, &CppCmakeMain::ToolRestat },
     { "rules",  "list all rules",
-      Tool::RUN_AFTER_LOAD, &NinjaMain::ToolRules },
+      Tool::RUN_AFTER_LOAD, &CppCmakeMain::ToolRules },
     { "cleandead",  "clean built files that are no longer produced by the manifest",
-      Tool::RUN_AFTER_LOGS, &NinjaMain::ToolCleanDead },
+      Tool::RUN_AFTER_LOGS, &CppCmakeMain::ToolCleanDead },
     { "urtle", NULL,
-      Tool::RUN_AFTER_FLAGS, &NinjaMain::ToolUrtle },
+      Tool::RUN_AFTER_FLAGS, &CppCmakeMain::ToolUrtle },
 #ifdef _WIN32
-    { "wincodepage", "print the Windows code page used by ninja",
-      Tool::RUN_AFTER_FLAGS, &NinjaMain::ToolWinCodePage },
+    { "wincodepage", "print the Windows code page used by cppcmake",
+      Tool::RUN_AFTER_FLAGS, &CppCmakeMain::ToolWinCodePage },
 #endif
     { NULL, NULL, Tool::RUN_AFTER_FLAGS, NULL }
   };
 
   if (tool_name == "list") {
-    printf("ninja subtools:\n");
+    printf("cppcmake subtools:\n");
     for (const Tool* tool = &kTools[0]; tool->name; ++tool) {
       if (tool->desc)
         printf("%11s  %s\n", tool->name, tool->desc);
@@ -1172,14 +1167,14 @@ const Tool* ChooseTool(const string& tool_name) {
   return NULL;  // Not reached.
 }
 
-/// Enable a debugging mode.  Returns false if Ninja should exit instead
+/// Enable a debugging mode.  Returns false if CppCmake should exit instead
 /// of continuing.
 bool DebugEnable(const string& name) {
   if (name == "list") {
     printf("debugging modes:\n"
 "  stats        print operation counts/timing info\n"
 "  explain      explain what caused a command to execute\n"
-"  keepdepfile  don't delete depfiles after they're read by ninja\n"
+"  keepdepfile  don't delete depfiles after they're read by cppcmake\n"
 "  keeprsp      don't delete @response files on success\n"
 #ifdef _WIN32
 "  nostatcache  don't batch stat() calls per directory and cache them\n"
@@ -1216,7 +1211,7 @@ bool DebugEnable(const string& name) {
   }
 }
 
-/// Set a warning flag.  Returns false if Ninja should exit instead of
+/// Set a warning flag.  Returns false if CppCmake should exit instead of
 /// continuing.
 bool WarningEnable(const string& name, Options* options) {
   if (name == "list") {
@@ -1247,8 +1242,8 @@ bool WarningEnable(const string& name, Options* options) {
   }
 }
 
-bool NinjaMain::OpenBuildLog(bool recompact_only) {
-  string log_path = ".ninja_log";
+bool CppCmakeMain::OpenBuildLog(bool recompact_only) {
+  string log_path = ".cppcmake_log";
   if (!build_dir_.empty())
     log_path = build_dir_ + "/" + log_path;
 
@@ -1286,8 +1281,8 @@ bool NinjaMain::OpenBuildLog(bool recompact_only) {
 
 /// Open the deps log: load it, then open for writing.
 /// @return false on error.
-bool NinjaMain::OpenDepsLog(bool recompact_only) {
-  string path = ".ninja_deps";
+bool CppCmakeMain::OpenDepsLog(bool recompact_only) {
+  string path = ".cppcmake_deps";
   if (!build_dir_.empty())
     path = build_dir_ + "/" + path;
 
@@ -1323,7 +1318,7 @@ bool NinjaMain::OpenDepsLog(bool recompact_only) {
   return true;
 }
 
-void NinjaMain::DumpMetrics() {
+void CppCmakeMain::DumpMetrics() {
   g_metrics->Report();
 
   printf("\n");
@@ -1333,7 +1328,7 @@ void NinjaMain::DumpMetrics() {
          count / (double) buckets, count, buckets);
 }
 
-bool NinjaMain::EnsureBuildDirExists() {
+bool CppCmakeMain::EnsureBuildDirExists() {
   build_dir_ = state_.bindings_.LookupVariable("builddir");
   if (!build_dir_.empty() && !config_.dry_run) {
     if (!disk_interface_.MakeDirs(build_dir_ + "/.") && errno != EEXIST) {
@@ -1345,7 +1340,7 @@ bool NinjaMain::EnsureBuildDirExists() {
   return true;
 }
 
-int NinjaMain::RunBuild(int argc, char** argv, Status* status) {
+int CppCmakeMain::RunBuild(int argc, char** argv, Status* status) {
   string err;
   vector<Node*> targets;
   if (!CollectTargetsFromArgs(argc, argv, &targets, &err)) {
@@ -1394,9 +1389,9 @@ int NinjaMain::RunBuild(int argc, char** argv, Status* status) {
 
 /// This handler processes fatal crashes that you can't catch
 /// Test example: C++ exception in a stack-unwind-block
-/// Real-world example: ninja launched a compiler to process a tricky
+/// Real-world example: cppcmake launched a compiler to process a tricky
 /// C++ input file. The compiler got itself into a state where it
-/// generated 3 GB of output and caused ninja to crash.
+/// generated 3 GB of output and caused cppcmake to crash.
 void TerminateHandler() {
   CreateWin32MiniDump(NULL);
   Fatal("terminate handler called");
@@ -1418,7 +1413,7 @@ class DeferGuessParallelism {
   bool needGuess;
   BuildConfig* config;
 
-  DeferGuessParallelism(BuildConfig* config)
+  explicit DeferGuessParallelism(BuildConfig* config)
       : needGuess(true), config(config) {}
 
   void Refresh() {
@@ -1431,7 +1426,7 @@ class DeferGuessParallelism {
 };
 
 /// Parse argv for command-line options.
-/// Returns an exit code, or -1 if Ninja should continue.
+/// Returns an exit code, or -1 if CppCmake should continue.
 int ReadFlags(int* argc, char*** argv,
               Options* options, BuildConfig* config) {
   DeferGuessParallelism deferGuessParallelism(config);
@@ -1511,7 +1506,7 @@ int ReadFlags(int* argc, char*** argv,
         options->working_dir = optarg;
         break;
       case OPT_VERSION:
-        printf("%s\n", kNinjaVersion);
+        printf("%s\n", kCppCmakeVersion);
         return 0;
       case 'h':
       default:
@@ -1528,13 +1523,13 @@ int ReadFlags(int* argc, char*** argv,
 
 NORETURN void real_main(int argc, char** argv) {
   // Use exit() instead of return in this function to avoid potentially
-  // expensive cleanup when destructing NinjaMain.
+  // expensive cleanup when destructing CppCmakeMain.
   BuildConfig config;
   Options options = {};
   options.input_file = "build.ninja";
 
   setvbuf(stdout, NULL, _IOLBF, BUFSIZ);
-  const char* ninja_command = argv[0];
+  const char* cppcmake_command = argv[0];
 
   int exit_code = ReadFlags(&argc, &argv, &options, &config);
   if (exit_code >= 0)
@@ -1556,22 +1551,22 @@ NORETURN void real_main(int argc, char** argv) {
   }
 
   if (options.tool && options.tool->when == Tool::RUN_AFTER_FLAGS) {
-    // None of the RUN_AFTER_FLAGS actually use a NinjaMain, but it's needed
+    // None of the RUN_AFTER_FLAGS actually use a CppCmakeMain, but it's needed
     // by other tools.
-    NinjaMain ninja(ninja_command, config);
-    exit((ninja.*options.tool->func)(&options, argc, argv));
+    CppCmakeMain cppcmake(cppcmake_command, config);
+    exit((cppcmake.*options.tool->func)(&options, argc, argv));
   }
 
   // Limit number of rebuilds, to prevent infinite loops.
   const int kCycleLimit = 100;
   for (int cycle = 1; cycle <= kCycleLimit; ++cycle) {
-    NinjaMain ninja(ninja_command, config);
+    CppCmakeMain cppcmake(cppcmake_command, config);
 
     ManifestParserOptions parser_opts;
     if (options.phony_cycle_should_err) {
       parser_opts.phony_cycle_action_ = kPhonyCycleActionError;
     }
-    ManifestParser parser(&ninja.state_, &ninja.disk_interface_, parser_opts);
+    ManifestParser parser(&cppcmake.state_, &cppcmake.disk_interface_, parser_opts);
     string err;
     if (!parser.Load(options.input_file, &err)) {
       status->Error("%s", err.c_str());
@@ -1579,19 +1574,19 @@ NORETURN void real_main(int argc, char** argv) {
     }
 
     if (options.tool && options.tool->when == Tool::RUN_AFTER_LOAD)
-      exit((ninja.*options.tool->func)(&options, argc, argv));
+      exit((cppcmake.*options.tool->func)(&options, argc, argv));
 
-    if (!ninja.EnsureBuildDirExists())
+    if (!cppcmake.EnsureBuildDirExists())
       exit(1);
 
-    if (!ninja.OpenBuildLog() || !ninja.OpenDepsLog())
+    if (!cppcmake.OpenBuildLog() || !cppcmake.OpenDepsLog())
       exit(1);
 
     if (options.tool && options.tool->when == Tool::RUN_AFTER_LOGS)
-      exit((ninja.*options.tool->func)(&options, argc, argv));
+      exit((cppcmake.*options.tool->func)(&options, argc, argv));
 
     // Attempt to rebuild the manifest before building anything else
-    if (ninja.RebuildManifest(options.input_file, &err, status)) {
+    if (cppcmake.RebuildManifest(options.input_file, &err, status)) {
       // In dry_run mode the regeneration will succeed without changing the
       // manifest forever. Better to return immediately.
       if (config.dry_run)
@@ -1603,11 +1598,11 @@ NORETURN void real_main(int argc, char** argv) {
       exit(1);
     }
 
-    ninja.ParsePreviousElapsedTimes();
+    cppcmake.ParsePreviousElapsedTimes();
 
-    int result = ninja.RunBuild(argc, argv, status);
+    int result = cppcmake.RunBuild(argc, argv, status);
     if (g_metrics)
-      ninja.DumpMetrics();
+      cppcmake.DumpMetrics();
     exit(result);
   }
 

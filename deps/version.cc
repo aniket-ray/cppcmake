@@ -20,7 +20,7 @@
 
 using namespace std;
 
-const char* kNinjaVersion = "1.13.0.git";
+const char* kCppCmakeVersion = "1.13.0.git";
 
 void ParseVersion(const string& version, int* major, int* minor) {
   size_t end = version.find('.');
@@ -35,14 +35,14 @@ void ParseVersion(const string& version, int* major, int* minor) {
 
 void CheckNinjaVersion(const string& version) {
   int bin_major, bin_minor;
-  ParseVersion(kNinjaVersion, &bin_major, &bin_minor);
+  ParseVersion(kCppCmakeVersion, &bin_major, &bin_minor);
   int file_major, file_minor;
   ParseVersion(version, &file_major, &file_minor);
 
   if (bin_major > file_major) {
     Warning("ninja executable version (%s) greater than build file "
             "ninja_required_version (%s); versions may be incompatible.",
-            kNinjaVersion, version.c_str());
+            kCppCmakeVersion, version.c_str());
     return;
   }
 
@@ -50,6 +50,6 @@ void CheckNinjaVersion(const string& version) {
       bin_major < file_major) {
     Fatal("ninja version (%s) incompatible with build file "
           "ninja_required_version version (%s).",
-          kNinjaVersion, version.c_str());
+          kCppCmakeVersion, version.c_str());
   }
 }
