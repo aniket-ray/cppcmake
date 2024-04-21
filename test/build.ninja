@@ -1,0 +1,20 @@
+# Defining variables for compiler and flags
+cxx = g++
+cflags = -Wall -Wextra -O2
+
+# Rule to compile C++ source files into object files
+rule compile
+  command = $cxx $cflags -c $in -o $out
+  description = Compiling $out
+
+# Rule to link object files into the final executable
+rule link
+  command = $cxx $in -o $out
+  description = Linking $out
+
+# Build statements to create object file and executable
+build helloworld.o: compile helloworld.cpp
+build helloworld: link helloworld.o
+
+# Default target to build when no target is specified
+default helloworld
