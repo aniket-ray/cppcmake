@@ -169,7 +169,11 @@ endif ()
 
 # Main executable is library plus main() function.
 if (CPPCMAKE_BUILD_BINARY)
-    add_executable(cppcmake src/cppcmake.cc)
+    add_executable(cppcmake src/cppcmake.cc
+            src/cppcmake_utils.cpp
+            src/cppcmake_utils.hpp
+            src/cppcmake_backend.cpp
+            src/cppcmake_backend.hpp)
     target_link_libraries(cppcmake PRIVATE libninja libninja-re2c)
 endif ()
 
