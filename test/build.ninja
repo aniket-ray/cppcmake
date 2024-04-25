@@ -1,15 +1,27 @@
 cxx = g++
-cflags = -Wall -Wextra -O2
+cflags = -Wall -std=c++11
+src_dir = .
+build_dir = build
+
+rule ensure_dir
+  command = mkdir -p $out
+  description = Ensure directory $out exists
 
 rule compile
   command = $cxx $cflags -c $in -o $out
-  description = Compiling $out
+  description = Compile $out
 
 rule link
   command = $cxx $in -o $out
-  description = Linking $out
+  description = Link $out
 
-build helloworld.o: compile helloworld.cpp
-build helloworld: link helloworld.o
 
-default helloworld
+build ${build_dir}: ensure_dir
+
+build ${build_dir}/my_lib.o: compile ${src_dir}/lib/my_lib.cpp
+build ${build_dir}/main.o: compile ${src_dir}/main.cpp | ${build_dir}
+
+build my_app: link ${build_dir}/main.o ${build_dir}/my_lib.o
+
+default my_app
+
