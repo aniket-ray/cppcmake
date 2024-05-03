@@ -19,22 +19,22 @@
 
 using namespace std;
 
-bool Parser::Load(const string& filename, string* err, Lexer* parent) {
+bool Parser::Load(const string& content, string* err, Lexer* parent) {
   // If |parent| is not NULL, metrics collection has been started by a parent
   // Parser::Load() in our call stack. Do not start a new one here to avoid
   // over-counting parsing times.
   METRIC_RECORD_IF(".ninja parse", parent == NULL);
   string contents;
   string read_err;
-  if (file_reader_->ReadFile(filename, &contents, &read_err) !=
-      FileReader::Okay) {
-    *err = "loading '" + filename + "': " + read_err;
-    if (parent)
-      parent->Error(string(*err), err);
-    return false;
-  }
+//  if (file_reader_->ReadFile(filename, &contents, &read_err) !=
+//      FileReader::Okay) {
+//    *err = "loading '" + filename + "': " + read_err;
+//    if (parent)
+//      parent->Error(string(*err), err);
+//    return false;
+//  }
 
-  return Parse(filename, contents, err);
+  return Parse("build.ninja", content, err);
 }
 
 bool Parser::ExpectToken(Lexer::Token expected, string* err) {

@@ -94,7 +94,7 @@ void Warning(const char* msg, ...) {
 }
 
 void Error(const char* msg, va_list ap) {
-  fprintf(stderr, "ninja: error: ");
+  fprintf(stderr, "cppcmake: error: ");
   vfprintf(stderr, msg, ap);
   fprintf(stderr, "\n");
 }

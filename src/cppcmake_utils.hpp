@@ -236,7 +236,7 @@ namespace CppCmake {
 
     int ReadFlags(int *argc, char ***argv, Options *options, BuildConfig *config);
 
-    NORETURN void real_main(int argc, char **argv);
+//    NORETURN void real_main(int argc, char **argv);
 };
 
 #endif //CPPCMAKE_CPPCMAKE_UTILS_HPP
