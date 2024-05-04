@@ -21,13 +21,9 @@ namespace CppCmake {
 
     class Make {
     public:
-        void setCxx(std::string &&compiler);
 
-        void setCflags(std::string &&flags);
+        void setVar(std::string &&key, std::string &&val);
 
-        void setSrc(std::string &&src);
-
-        void setBuildDir(std::string &&build_dir);
 
         void setDefault(std::string &&def);
 
@@ -46,6 +42,7 @@ namespace CppCmake {
         std::string default_;
         std::string build_dir_;
 
+        std::vector<std::pair<std::string, std::string>> mappings_;
         std::vector<CppCmake::Rule> rules_;
         std::vector<CppCmake::BuildTarget> builds_;
 

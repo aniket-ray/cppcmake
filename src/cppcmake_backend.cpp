@@ -1,20 +1,9 @@
 #include "cppcmake_backend.hpp"
 
-void CppCmake::Make::setCxx(std::string &&compiler) {
-    this->cxx_ = compiler;
+void CppCmake::Make::setVar(std::string &&key, std::string &&val) {
+    mappings_.emplace_back(key, val);
 }
 
-void CppCmake::Make::setCflags(std::string &&flags) {
-    this->cflags_ = flags;
-}
-
-void CppCmake::Make::setSrc(std::string &&src) {
-    this->src_ = src;
-}
-
-void CppCmake::Make::setBuildDir(std::string &&build_dir) {
-    this->build_dir_ = build_dir;
-}
 
 void CppCmake::Make::setDefault(std::string &&def) {
     this->default_ = def;
@@ -31,9 +20,12 @@ void CppCmake::Make::addBuildTarget(BuildTarget &&build) {
 std::string CppCmake::Make::generate_string_() {
     std::string out;
     out += "cxx = " + this->cxx_ + "\n";
-    out += "cflags = " + this->cflags_ + "\n";
-    out += "src_dir = " + this->src_ + "\n";
-    out += "build_dir = " + this->build_dir_ + "\n\n";
+    out += "cflags = " + this->cflags_ + "\n\n";
+
+    for(const auto& m : mappings_) {
+        out += m.first + " = " + m.second + "\n";
+    }
+
 
     // rule
     for (auto r: this->rules_) {
