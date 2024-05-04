@@ -5,40 +5,39 @@ int main(int argc, char **argv) {
 //    CppCmake::real_main(argc, argv);
     CppCmake::Make make;
 
-    make.setCxx("g++");
-    make.setCflags("-Wall -std=c++11");
-    make.setSrc(".");
-    make.setBuildDir("build");
+    make.setVar("cxx", "g++");
+    make.setVar("cflags", "-I./include -O2");
 
-    make.addRule({
-            .name = "ensure_dir",
-            .command = "/Users/aniket/NYU/CppCmake/test",
-            .description = "Ensure directory $out exists"
-    });
 
     make.addRule({
             .name = "compile",
-            .command = "$cxx $cflags -c $in -o $out",
-            .description = "Compile $out"
+            .command = "$cxx -c $cflags -o $out $in",
+            .description = "Compiling $in"
     });
 
     make.addRule({
             .name = "link",
             .command = "$cxx $in -o $out",
-            .description = "Link $out"
+            .description = "Linking $out"
+    });
+
+
+
+    make.addBuildTarget({
+            .src = "obj/hello.o",
+            .target = "compile src/hello.cpp"
     });
 
     make.addBuildTarget({
-            .src = "helloworld.o",
-            .target = "compile helloworld.cpp"
+            .src = "obj/main.o",
+            .target = "compile src/main.cpp"
     });
-
     make.addBuildTarget({
-            .src = "helloworld",
-            .target = "link helloworld.o"
+            .src = "hello",
+            .target = "link obj/hello.o obj/main.o"
     });
 
-    make.setDefault("helloworld");
+    make.setDefault("hello");
 
     make.build(argc, argv);
 
