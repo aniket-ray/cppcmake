@@ -21,20 +21,30 @@ namespace CppCmake {
 
     class Make {
     public:
+        void setVar(std::string&& key, std::string&& val);
 
-        void setVar(std::string &&key, std::string &&val);
+        void setDefault(std::string&& def);
 
+        void addRule(CppCmake::Rule&& rule);
 
-        void setDefault(std::string &&def);
+        void addBuildTarget(CppCmake::BuildTarget&& build);
 
-        void addRule(CppCmake::Rule &&rule);
+        NORETURN void build(int argc, char** argv);
 
-        void addBuildTarget(CppCmake::BuildTarget &&build);
+        Make();
 
-
-        NORETURN void build(int argc, char **argv);
+        Make(Make&&) = delete;
+        Make(const Make&) = delete;
+        Make operator=(Make&&) = delete;
+        Make operator=(const Make&) = delete;
 
     private:
+        std::unique_ptr<CppCmake::CppCmakeMain> cppCmakeMain_;
+
+        const char* cppcmake_command_;
+        CppCmake::Options options_ = {};
+        BuildConfig config_;
+
         std::string cxx_;
         std::string def_;
         std::string src_;
@@ -49,7 +59,6 @@ namespace CppCmake {
         std::string generate_string_();
     };
 
+};  // namespace CppCmake
 
-};
-
-#endif //CPPCMAKE_CPPCMAKE_BACKEND_HPP
+#endif  //CPPCMAKE_CPPCMAKE_BACKEND_HPP
