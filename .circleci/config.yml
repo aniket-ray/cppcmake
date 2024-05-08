@@ -24,12 +24,12 @@ jobs:
       - run:
           name: Run Clang-Format
           command: |
-            find ./src -iname "*.cpp" -o -iname "*.h" | xargs clang-format -i
+            find . -iname "*.cpp" -o -iname "*.cc" -o -iname "*.h" | xargs clang-format -i
             git diff --exit-code
       - run:
           name: Run Clang-Tidy
           command: |
-            find ./src -iname "*.cpp" | xargs clang-tidy -p .
+            find . -iname "*.cpp" -o -iname "*.cc" -o -iname "*.h" | xargs clang-tidy -p .
 
 
 workflows:

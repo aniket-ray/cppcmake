@@ -32,33 +32,25 @@ namespace {
 /// Compute a platform-specific high-res timer value that fits into an int64.
 int64_t HighResTimer() {
   auto now = chrono::steady_clock::now();
-  return chrono::duration_cast<chrono::steady_clock::duration>(
-             now.time_since_epoch())
-      .count();
+  return chrono::duration_cast<chrono::steady_clock::duration>(now.time_since_epoch()).count();
 }
 
 constexpr int64_t GetFrequency() {
   // If numerator isn't 1 then we lose precision and that will need to be
   // assessed.
-  static_assert(std::chrono::steady_clock::period::num == 1,
-                "Numerator must be 1");
-  return std::chrono::steady_clock::period::den /
-         std::chrono::steady_clock::period::num;
+  static_assert(std::chrono::steady_clock::period::num == 1, "Numerator must be 1");
+  return std::chrono::steady_clock::period::den / std::chrono::steady_clock::period::num;
 }
 
 int64_t TimerToMicros(int64_t dt) {
   // dt is in ticks.  We want microseconds.
-  return chrono::duration_cast<chrono::microseconds>(
-             std::chrono::steady_clock::duration{ dt })
-      .count();
+  return chrono::duration_cast<chrono::microseconds>(std::chrono::steady_clock::duration{dt}).count();
 }
 
 int64_t TimerToMicros(double dt) {
   // dt is in ticks.  We want microseconds.
-  using DoubleSteadyClock =
-      std::chrono::duration<double, std::chrono::steady_clock::period>;
-  return chrono::duration_cast<chrono::microseconds>(DoubleSteadyClock{ dt })
-      .count();
+  using DoubleSteadyClock = std::chrono::duration<double, std::chrono::steady_clock::period>;
+  return chrono::duration_cast<chrono::microseconds>(DoubleSteadyClock{dt}).count();
 }
 
 }  // anonymous namespace
@@ -69,6 +61,7 @@ ScopedMetric::ScopedMetric(Metric* metric) {
     return;
   start_ = HighResTimer();
 }
+
 ScopedMetric::~ScopedMetric() {
   if (!metric_)
     return;
@@ -90,21 +83,17 @@ Metric* Metrics::NewMetric(const string& name) {
 
 void Metrics::Report() {
   int width = 0;
-  for (vector<Metric*>::iterator i = metrics_.begin();
-       i != metrics_.end(); ++i) {
+  for (vector<Metric*>::iterator i = metrics_.begin(); i != metrics_.end(); ++i) {
     width = max((int)(*i)->name.size(), width);
   }
 
-  printf("%-*s\t%-6s\t%-9s\t%s\n", width,
-         "metric", "count", "avg (us)", "total (ms)");
-  for (vector<Metric*>::iterator i = metrics_.begin();
-       i != metrics_.end(); ++i) {
+  printf("%-*s\t%-6s\t%-9s\t%s\n", width, "metric", "count", "avg (us)", "total (ms)");
+  for (vector<Metric*>::iterator i = metrics_.begin(); i != metrics_.end(); ++i) {
     Metric* metric = *i;
     uint64_t micros = TimerToMicros(metric->sum);
     double total = micros / (double)1000;
     double avg = micros / (double)metric->count;
-    printf("%-*s\t%-6d\t%-8.1f\t%.1f\n", width, metric->name.c_str(),
-           metric->count, avg, total);
+    printf("%-*s\t%-6d\t%-8.1f\t%.1f\n", width, metric->name.c_str(), metric->count, avg, total);
   }
 }
 

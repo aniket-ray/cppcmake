@@ -3,4 +3,4 @@
 
 void hello();
 
-#endif //CPPCMAKE_LIBRARY_H
+#endif  //CPPCMAKE_LIBRARY_H

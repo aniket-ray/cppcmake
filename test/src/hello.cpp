@@ -1,7 +1,7 @@
 // src/hello.cpp
-#include "hello.h"
+#include "../include/hello.h"
 #include <iostream>
 
 void say_hello() {
-    std::cout << "Hello, Ninja!" << std::endl;
+  std::cout << "Hello, Ninja!" << std::endl;
 }

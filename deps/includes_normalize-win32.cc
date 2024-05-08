@@ -28,13 +28,10 @@ using namespace std;
 
 namespace {
 
-bool InternalGetFullPathName(const StringPiece& file_name, char* buffer,
-                             size_t buffer_length, string *err) {
-  DWORD result_size = GetFullPathNameA(file_name.AsString().c_str(),
-                                       buffer_length, buffer, NULL);
+bool InternalGetFullPathName(const StringPiece& file_name, char* buffer, size_t buffer_length, string* err) {
+  DWORD result_size = GetFullPathNameA(file_name.AsString().c_str(), buffer_length, buffer, NULL);
   if (result_size == 0) {
-    *err = "GetFullPathNameA(" + file_name.AsString() + "): " +
-        GetLastErrorString();
+    *err = "GetFullPathNameA(" + file_name.AsString() + "): " + GetLastErrorString();
     return false;
   } else if (result_size > buffer_length) {
     *err = "path too long";
@@ -44,7 +41,7 @@ bool InternalGetFullPathName(const StringPiece& file_name, char* buffer,
 }
 
 bool IsPathSeparator(char c) {
-  return c == '/' ||  c == '\\';
+  return c == '/' || c == '\\';
 }
 
 // Return true if paths a and b are on the same windows drive.
@@ -71,7 +68,7 @@ bool SameDriveFast(StringPiece a, StringPiece b) {
 }
 
 // Return true if paths a and b are on the same Windows drive.
-bool SameDrive(StringPiece a, StringPiece b, string* err)  {
+bool SameDrive(StringPiece a, StringPiece b, string* err) {
   if (SameDriveFast(a, b)) {
     return true;
   }
@@ -95,10 +92,7 @@ bool SameDrive(StringPiece a, StringPiece b, string* err)  {
 // This ignores difference of path separator.
 // This is used not to call very slow GetFullPathName API.
 bool IsFullPathName(StringPiece s) {
-  if (s.size() < 3 ||
-      !islatinalpha(s[0]) ||
-      s[1] != ':' ||
-      !IsPathSeparator(s[2])) {
+  if (s.size() < 3 || !islatinalpha(s[0]) || s[1] != ':' || !IsPathSeparator(s[2])) {
     return false;
   }
 
@@ -109,14 +103,12 @@ bool IsFullPathName(StringPiece s) {
     }
 
     // Check ".".
-    if (i + 1 < s.size() && s[i+1] == '.' &&
-        (i + 2 >= s.size() || IsPathSeparator(s[i+2]))) {
+    if (i + 1 < s.size() && s[i + 1] == '.' && (i + 2 >= s.size() || IsPathSeparator(s[i + 2]))) {
       return false;
     }
 
     // Check "..".
-    if (i + 2 < s.size() && s[i+1] == '.' && s[i+2] == '.' &&
-        (i + 3 >= s.size() || IsPathSeparator(s[i+3]))) {
+    if (i + 2 < s.size() && s[i + 1] == '.' && s[i + 2] == '.' && (i + 3 >= s.size() || IsPathSeparator(s[i + 3]))) {
       return false;
     }
   }
@@ -156,15 +148,13 @@ string IncludesNormalize::AbsPath(StringPiece s, string* err) {
   return result;
 }
 
-string IncludesNormalize::Relativize(
-    StringPiece path, const vector<StringPiece>& start_list, string* err) {
+string IncludesNormalize::Relativize(StringPiece path, const vector<StringPiece>& start_list, string* err) {
   string abs_path = AbsPath(path, err);
   if (!err->empty())
     return "";
   vector<StringPiece> path_list = SplitStringPiece(abs_path, '/');
   int i;
-  for (i = 0; i < static_cast<int>(min(start_list.size(), path_list.size()));
-       ++i) {
+  for (i = 0; i < static_cast<int>(min(start_list.size(), path_list.size())); ++i) {
     if (!EqualsCaseInsensitiveASCII(start_list[i], path_list[i])) {
       break;
     }
@@ -181,8 +171,7 @@ string IncludesNormalize::Relativize(
   return JoinStringPiece(rel_list, '/');
 }
 
-bool IncludesNormalize::Normalize(const string& input,
-                                  string* result, string* err) const {
+bool IncludesNormalize::Normalize(const string& input, string* result, string* err) const {
   char copy[_MAX_PATH + 1];
   size_t len = input.size();
   if (len > _MAX_PATH) {

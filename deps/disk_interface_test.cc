@@ -15,9 +15,9 @@
 #include <assert.h>
 #include <stdio.h>
 #ifdef _WIN32
+#include <direct.h>
 #include <io.h>
 #include <windows.h>
-#include <direct.h>
 #endif
 
 #include "disk_interface.h"
@@ -34,12 +34,10 @@ struct DiskInterfaceTest : public testing::Test {
     temp_dir_.CreateAndEnter("Ninja-DiskInterfaceTest");
   }
 
-  virtual void TearDown() {
-    temp_dir_.Cleanup();
-  }
+  virtual void TearDown() { temp_dir_.Cleanup(); }
 
   bool Touch(const char* path) {
-    FILE *f = fopen(path, "w");
+    FILE* f = fopen(path, "w");
     if (!f)
       return false;
     return fclose(f) == 0;
@@ -103,14 +101,13 @@ TEST_F(DiskInterfaceTest, StatExistingFileWithLongPath) {
   char currentdir[32767];
   _getcwd(currentdir, sizeof(currentdir));
   const string filename = string(currentdir) +
-"\\filename_with_256_characters_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\
+                          "\\filename_with_256_characters_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\
 xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\
 xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\
 xxxxxxxxxxxxxxxxxxxxx";
   const string prefixed = "\\\\?\\" + filename;
   ASSERT_TRUE(Touch(prefixed.c_str()));
-  EXPECT_GT(disk_.Stat(disk_.AreLongPathsEnabled() ?
-    filename : prefixed, &err), 1);
+  EXPECT_GT(disk_.Stat(disk_.AreLongPathsEnabled() ? filename : prefixed, &err), 1);
   EXPECT_EQ("", err);
 }
 #endif
@@ -128,12 +125,9 @@ TEST_F(DiskInterfaceTest, StatExistingDir) {
   EXPECT_GT(disk_.Stat("subdir/subsubdir", &err), 1);
   EXPECT_EQ("", err);
 
-  EXPECT_EQ(disk_.Stat("subdir", &err),
-            disk_.Stat("subdir/.", &err));
-  EXPECT_EQ(disk_.Stat("subdir", &err),
-            disk_.Stat("subdir/subsubdir/..", &err));
-  EXPECT_EQ(disk_.Stat("subdir/subsubdir", &err),
-            disk_.Stat("subdir/subsubdir/.", &err));
+  EXPECT_EQ(disk_.Stat("subdir", &err), disk_.Stat("subdir/.", &err));
+  EXPECT_EQ(disk_.Stat("subdir", &err), disk_.Stat("subdir/subsubdir/..", &err));
+  EXPECT_EQ(disk_.Stat("subdir/subsubdir", &err), disk_.Stat("subdir/subsubdir/.", &err));
 }
 
 #ifdef _WIN32
@@ -171,26 +165,25 @@ TEST_F(DiskInterfaceTest, StatCache) {
   EXPECT_GT(disk_.Stat("subdir/subsubdir", &err), 1);
   EXPECT_EQ("", err);
 
-#ifndef _MSC_VER // TODO: Investigate why. Also see https://github.com/ninja-build/ninja/pull/1423
-  EXPECT_EQ(disk_.Stat("subdir", &err),
-            disk_.Stat("subdir/.", &err));
+#ifndef _MSC_VER  // TODO: Investigate why. Also see https://github.com/ninja-build/ninja/pull/1423
+  EXPECT_EQ(disk_.Stat("subdir", &err), disk_.Stat("subdir/.", &err));
   EXPECT_EQ("", err);
-  EXPECT_EQ(disk_.Stat("subdir", &err),
-            disk_.Stat("subdir/subsubdir/..", &err));
+  EXPECT_EQ(disk_.Stat("subdir", &err), disk_.Stat("subdir/subsubdir/..", &err));
 #endif
   EXPECT_EQ("", err);
   EXPECT_EQ(disk_.Stat("..", &err), parent_stat_uncached);
   EXPECT_EQ("", err);
-  EXPECT_EQ(disk_.Stat("subdir/subsubdir", &err),
-            disk_.Stat("subdir/subsubdir/.", &err));
+  EXPECT_EQ(disk_.Stat("subdir/subsubdir", &err), disk_.Stat("subdir/subsubdir/.", &err));
   EXPECT_EQ("", err);
 
   // Test error cases.
   string bad_path("cc:\\foo");
   EXPECT_EQ(-1, disk_.Stat(bad_path, &err));
-  EXPECT_NE("", err); err.clear();
+  EXPECT_NE("", err);
+  err.clear();
   EXPECT_EQ(-1, disk_.Stat(bad_path, &err));
-  EXPECT_NE("", err); err.clear();
+  EXPECT_NE("", err);
+  err.clear();
   EXPECT_EQ(0, disk_.Stat("nosuchfile", &err));
   EXPECT_EQ("", err);
   EXPECT_EQ(0, disk_.Stat("nosuchdir/nosuchfile", &err));
@@ -201,10 +194,9 @@ TEST_F(DiskInterfaceTest, StatCache) {
 TEST_F(DiskInterfaceTest, ReadFile) {
   string err;
   std::string content;
-  ASSERT_EQ(DiskInterface::NotFound,
-            disk_.ReadFile("foobar", &content, &err));
+  ASSERT_EQ(DiskInterface::NotFound, disk_.ReadFile("foobar", &content, &err));
   EXPECT_EQ("", content);
-  EXPECT_NE("", err); // actual value is platform-specific
+  EXPECT_NE("", err);  // actual value is platform-specific
   err.clear();
 
   const char* kTestFile = "testfile";
@@ -214,8 +206,7 @@ TEST_F(DiskInterfaceTest, ReadFile) {
   fprintf(f, "%s", kTestContent);
   ASSERT_EQ(0, fclose(f));
 
-  ASSERT_EQ(DiskInterface::Okay,
-            disk_.ReadFile(kTestFile, &content, &err));
+  ASSERT_EQ(DiskInterface::Okay, disk_.ReadFile(kTestFile, &content, &err));
   EXPECT_EQ(kTestContent, content);
   EXPECT_EQ("", err);
 }
@@ -257,24 +248,27 @@ TEST_F(DiskInterfaceTest, RemoveDirectory) {
   EXPECT_EQ(1, disk_.RemoveFile("does not exist"));
 }
 
-struct StatTest : public StateTestWithBuiltinRules,
-                  public DiskInterface {
+struct StatTest : public StateTestWithBuiltinRules, public DiskInterface {
   StatTest() : scan_(&state_, NULL, NULL, this, NULL) {}
 
   // DiskInterface implementation.
   virtual TimeStamp Stat(const string& path, string* err) const;
+
   virtual bool WriteFile(const string& path, const string& contents) {
     assert(false);
     return true;
   }
+
   virtual bool MakeDir(const string& path) {
     assert(false);
     return false;
   }
+
   virtual Status ReadFile(const string& path, string* contents, string* err) {
     assert(false);
     return NotFound;
   }
+
   virtual int RemoveFile(const string& path) {
     assert(false);
     return 0;
@@ -294,8 +288,7 @@ TimeStamp StatTest::Stat(const string& path, string* err) const {
 }
 
 TEST_F(StatTest, Simple) {
-  ASSERT_NO_FATAL_FAILURE(AssertParse(&state_,
-"build out: cat in\n"));
+  ASSERT_NO_FATAL_FAILURE(AssertParse(&state_, "build out: cat in\n"));
 
   Node* out = GetNode("out");
   string err;
@@ -305,13 +298,13 @@ TEST_F(StatTest, Simple) {
   scan_.RecomputeDirty(out, NULL, NULL);
   ASSERT_EQ(2u, stats_.size());
   ASSERT_EQ("out", stats_[0]);
-  ASSERT_EQ("in",  stats_[1]);
+  ASSERT_EQ("in", stats_[1]);
 }
 
 TEST_F(StatTest, TwoStep) {
   ASSERT_NO_FATAL_FAILURE(AssertParse(&state_,
-"build out: cat mid\n"
-"build mid: cat in\n"));
+                                      "build out: cat mid\n"
+                                      "build mid: cat in\n"));
 
   Node* out = GetNode("out");
   string err;
@@ -322,16 +315,16 @@ TEST_F(StatTest, TwoStep) {
   ASSERT_EQ(3u, stats_.size());
   ASSERT_EQ("out", stats_[0]);
   ASSERT_TRUE(GetNode("out")->dirty());
-  ASSERT_EQ("mid",  stats_[1]);
+  ASSERT_EQ("mid", stats_[1]);
   ASSERT_TRUE(GetNode("mid")->dirty());
-  ASSERT_EQ("in",  stats_[2]);
+  ASSERT_EQ("in", stats_[2]);
 }
 
 TEST_F(StatTest, Tree) {
   ASSERT_NO_FATAL_FAILURE(AssertParse(&state_,
-"build out: cat mid1 mid2\n"
-"build mid1: cat in11 in12\n"
-"build mid2: cat in21 in22\n"));
+                                      "build out: cat mid1 mid2\n"
+                                      "build mid1: cat in11 in12\n"
+                                      "build mid2: cat in21 in22\n"));
 
   Node* out = GetNode("out");
   string err;
@@ -347,8 +340,8 @@ TEST_F(StatTest, Tree) {
 
 TEST_F(StatTest, Middle) {
   ASSERT_NO_FATAL_FAILURE(AssertParse(&state_,
-"build out: cat mid\n"
-"build mid: cat in\n"));
+                                      "build out: cat mid\n"
+                                      "build mid: cat in\n"));
 
   mtimes_["in"] = 1;
   mtimes_["mid"] = 0;  // missing

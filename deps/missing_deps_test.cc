@@ -23,13 +23,13 @@
 const char kTestDepsLogFilename[] = "MissingDepTest-tempdepslog";
 
 class MissingDependencyTestDelegate : public MissingDependencyScannerDelegate {
-  void OnMissingDep(Node* node, const std::string& path,
-                    const Rule& generator) {}
+  void OnMissingDep(Node* node, const std::string& path, const Rule& generator) {}
 };
 
 struct MissingDependencyScannerTest : public testing::Test {
   MissingDependencyScannerTest()
-      : generator_rule_("generator_rule"), compile_rule_("compile_rule"),
+      : generator_rule_("generator_rule"),
+        compile_rule_("compile_rule"),
         scanner_(&delegate_, &deps_log_, &state_, &filesystem_) {
     std::string err;
     deps_log_.OpenForWrite(kTestDepsLogFilename, &err);
@@ -44,7 +44,7 @@ struct MissingDependencyScannerTest : public testing::Test {
   MissingDependencyScanner& scanner() { return scanner_; }
 
   void RecordDepsLogDep(const std::string& from, const std::string& to) {
-    Node* node_deps[] = { state_.LookupNode(to) };
+    Node* node_deps[] = {state_.LookupNode(to)};
     deps_log_.RecordDeps(state_.LookupNode(from), 0, 1, node_deps);
   }
 
@@ -52,8 +52,7 @@ struct MissingDependencyScannerTest : public testing::Test {
     std::string err;
     std::vector<Node*> nodes = state_.RootNodes(&err);
     EXPECT_EQ("", err);
-    for (std::vector<Node*>::iterator it = nodes.begin(); it != nodes.end();
-         ++it) {
+    for (std::vector<Node*>::iterator it = nodes.begin(); it != nodes.end(); ++it) {
       scanner().ProcessNode(*it);
     }
   }
@@ -75,8 +74,7 @@ struct MissingDependencyScannerTest : public testing::Test {
     state_.AddIn(from_edge, to, 0);
   }
 
-  void AssertMissingDependencyBetween(const char* flaky, const char* generated,
-                                      Rule* rule) {
+  void AssertMissingDependencyBetween(const char* flaky, const char* generated, Rule* rule) {
     Node* flaky_node = state_.LookupNode(flaky);
     ASSERT_EQ(1u, scanner().nodes_missing_deps_.count(flaky_node));
     Node* generated_node = state_.LookupNode(generated);
@@ -113,8 +111,7 @@ TEST_F(MissingDependencyScannerTest, MissingDepPresent) {
   ASSERT_TRUE(scanner().HadMissingDeps());
   ASSERT_EQ(1u, scanner().nodes_missing_deps_.size());
   ASSERT_EQ(1u, scanner().missing_dep_path_count_);
-  AssertMissingDependencyBetween("compiled_object", "generated_header",
-                                 &generator_rule_);
+  AssertMissingDependencyBetween("compiled_object", "generated_header", &generator_rule_);
 }
 
 TEST_F(MissingDependencyScannerTest, MissingDepFixedDirect) {
@@ -148,10 +145,8 @@ TEST_F(MissingDependencyScannerTest, CyclicMissingDep) {
   ASSERT_TRUE(scanner().HadMissingDeps());
   ASSERT_EQ(2u, scanner().nodes_missing_deps_.size());
   ASSERT_EQ(2u, scanner().missing_dep_path_count_);
-  AssertMissingDependencyBetween("compiled_object", "generated_header",
-                                 &generator_rule_);
-  AssertMissingDependencyBetween("generated_header", "compiled_object",
-                                 &compile_rule_);
+  AssertMissingDependencyBetween("compiled_object", "generated_header", &generator_rule_);
+  AssertMissingDependencyBetween("generated_header", "compiled_object", &compile_rule_);
 }
 
 TEST_F(MissingDependencyScannerTest, CycleInGraph) {

@@ -23,16 +23,15 @@ TEST(CLParserTest, ShowIncludes) {
   ASSERT_EQ("", CLParser::FilterShowIncludes("", ""));
 
   ASSERT_EQ("", CLParser::FilterShowIncludes("Sample compiler output", ""));
-  ASSERT_EQ("c:\\Some Files\\foobar.h",
-            CLParser::FilterShowIncludes("Note: including file: "
-                                         "c:\\Some Files\\foobar.h", ""));
-  ASSERT_EQ("c:\\initspaces.h",
-            CLParser::FilterShowIncludes("Note: including file:    "
-                                         "c:\\initspaces.h", ""));
-  ASSERT_EQ("c:\\initspaces.h",
-            CLParser::FilterShowIncludes("Non-default prefix: inc file:    "
-                                         "c:\\initspaces.h",
-                    "Non-default prefix: inc file:"));
+  ASSERT_EQ("c:\\Some Files\\foobar.h", CLParser::FilterShowIncludes("Note: including file: "
+                                                                     "c:\\Some Files\\foobar.h",
+                                                                     ""));
+  ASSERT_EQ("c:\\initspaces.h", CLParser::FilterShowIncludes("Note: including file:    "
+                                                             "c:\\initspaces.h",
+                                                             ""));
+  ASSERT_EQ("c:\\initspaces.h", CLParser::FilterShowIncludes("Non-default prefix: inc file:    "
+                                                             "c:\\initspaces.h",
+                                                             "Non-default prefix: inc file:"));
 }
 
 TEST(CLParserTest, FilterInputFilename) {
@@ -41,19 +40,19 @@ TEST(CLParserTest, FilterInputFilename) {
   ASSERT_TRUE(CLParser::FilterInputFilename("baz.c"));
   ASSERT_TRUE(CLParser::FilterInputFilename("FOOBAR.CC"));
 
-  ASSERT_FALSE(CLParser::FilterInputFilename(
-                   "src\\cl_helper.cc(166) : fatal error C1075: end "
-                   "of file found ..."));
+  ASSERT_FALSE(
+      CLParser::FilterInputFilename("src\\cl_helper.cc(166) : fatal error C1075: end "
+                                    "of file found ..."));
 }
 
 TEST(CLParserTest, ParseSimple) {
   CLParser parser;
   string output, err;
-  ASSERT_TRUE(parser.Parse(
-      "foo\r\n"
-      "Note: inc file prefix:  foo.h\r\n"
-      "bar\r\n",
-      "Note: inc file prefix:", &output, &err));
+  ASSERT_TRUE(
+      parser.Parse("foo\r\n"
+                   "Note: inc file prefix:  foo.h\r\n"
+                   "bar\r\n",
+                   "Note: inc file prefix:", &output, &err));
 
   ASSERT_EQ("foo\nbar\n", output);
   ASSERT_EQ(1u, parser.includes_.size());
@@ -63,32 +62,32 @@ TEST(CLParserTest, ParseSimple) {
 TEST(CLParserTest, ParseFilenameFilter) {
   CLParser parser;
   string output, err;
-  ASSERT_TRUE(parser.Parse(
-      "foo.cc\r\n"
-      "cl: warning\r\n",
-      "", &output, &err));
+  ASSERT_TRUE(
+      parser.Parse("foo.cc\r\n"
+                   "cl: warning\r\n",
+                   "", &output, &err));
   ASSERT_EQ("cl: warning\n", output);
 }
 
 TEST(CLParserTest, NoFilenameFilterAfterShowIncludes) {
   CLParser parser;
   string output, err;
-  ASSERT_TRUE(parser.Parse(
-      "foo.cc\r\n"
-      "Note: including file: foo.h\r\n"
-      "something something foo.cc\r\n",
-      "", &output, &err));
+  ASSERT_TRUE(
+      parser.Parse("foo.cc\r\n"
+                   "Note: including file: foo.h\r\n"
+                   "something something foo.cc\r\n",
+                   "", &output, &err));
   ASSERT_EQ("something something foo.cc\n", output);
 }
 
 TEST(CLParserTest, ParseSystemInclude) {
   CLParser parser;
   string output, err;
-  ASSERT_TRUE(parser.Parse(
-      "Note: including file: c:\\Program Files\\foo.h\r\n"
-      "Note: including file: d:\\Microsoft Visual Studio\\bar.h\r\n"
-      "Note: including file: path.h\r\n",
-      "", &output, &err));
+  ASSERT_TRUE(
+      parser.Parse("Note: including file: c:\\Program Files\\foo.h\r\n"
+                   "Note: including file: d:\\Microsoft Visual Studio\\bar.h\r\n"
+                   "Note: including file: path.h\r\n",
+                   "", &output, &err));
   // We should have dropped the first two includes because they look like
   // system headers.
   ASSERT_EQ("", output);
@@ -99,11 +98,11 @@ TEST(CLParserTest, ParseSystemInclude) {
 TEST(CLParserTest, DuplicatedHeader) {
   CLParser parser;
   string output, err;
-  ASSERT_TRUE(parser.Parse(
-      "Note: including file: foo.h\r\n"
-      "Note: including file: bar.h\r\n"
-      "Note: including file: foo.h\r\n",
-      "", &output, &err));
+  ASSERT_TRUE(
+      parser.Parse("Note: including file: foo.h\r\n"
+                   "Note: including file: bar.h\r\n"
+                   "Note: including file: foo.h\r\n",
+                   "", &output, &err));
   // We should have dropped one copy of foo.h.
   ASSERT_EQ("", output);
   ASSERT_EQ(2u, parser.includes_.size());

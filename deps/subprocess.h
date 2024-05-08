@@ -15,9 +15,9 @@
 #ifndef NINJA_SUBPROCESS_H_
 #define NINJA_SUBPROCESS_H_
 
+#include <queue>
 #include <string>
 #include <vector>
-#include <queue>
 
 #ifdef _WIN32
 #include <windows.h>
@@ -27,10 +27,10 @@
 
 // ppoll() exists on FreeBSD, but only on newer versions.
 #ifdef __FreeBSD__
-#  include <sys/param.h>
-#  if defined USE_PPOLL && __FreeBSD_version < 1002000
-#    undef USE_PPOLL
-#  endif
+#include <sys/param.h>
+#if defined USE_PPOLL && __FreeBSD_version < 1002000
+#undef USE_PPOLL
+#endif
 #endif
 
 #include "exit_status.h"
@@ -110,4 +110,4 @@ struct SubprocessSet {
 #endif
 };
 
-#endif // NINJA_SUBPROCESS_H_
+#endif  // NINJA_SUBPROCESS_H_

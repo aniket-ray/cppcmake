@@ -31,24 +31,22 @@ struct State;
 class MissingDependencyScannerDelegate {
  public:
   virtual ~MissingDependencyScannerDelegate();
-  virtual void OnMissingDep(Node* node, const std::string& path,
-                            const Rule& generator) = 0;
+  virtual void OnMissingDep(Node* node, const std::string& path, const Rule& generator) = 0;
 };
 
 class MissingDependencyPrinter : public MissingDependencyScannerDelegate {
   void OnMissingDep(Node* node, const std::string& path, const Rule& generator);
-  void OnStats(int nodes_processed, int nodes_missing_deps,
-               int missing_dep_path_count, int generated_nodes,
+  void OnStats(int nodes_processed, int nodes_missing_deps, int missing_dep_path_count, int generated_nodes,
                int generator_rules);
 };
 
 struct MissingDependencyScanner {
  public:
-  MissingDependencyScanner(MissingDependencyScannerDelegate* delegate,
-                           DepsLog* deps_log, State* state,
+  MissingDependencyScanner(MissingDependencyScannerDelegate* delegate, DepsLog* deps_log, State* state,
                            DiskInterface* disk_interface);
   void ProcessNode(Node* node);
   void PrintStats();
+
   bool HadMissingDeps() { return !nodes_missing_deps_.empty(); }
 
   void ProcessNodeDeps(Node* node, Node** dep_nodes, int dep_nodes_count);

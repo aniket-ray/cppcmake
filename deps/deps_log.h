@@ -67,6 +67,7 @@ struct State;
 /// repacking step can run occasionally to remove dead records.
 struct DepsLog {
   DepsLog() : needs_recompaction_(false), file_(NULL) {}
+
   ~DepsLog();
 
   // Writing (build-time) interface.
@@ -77,13 +78,15 @@ struct DepsLog {
 
   // Reading (startup-time) interface.
   struct Deps {
-    Deps(int64_t mtime, int node_count)
-        : mtime(mtime), node_count(node_count), nodes(new Node*[node_count]) {}
-    ~Deps() { delete [] nodes; }
+    Deps(int64_t mtime, int node_count) : mtime(mtime), node_count(node_count), nodes(new Node*[node_count]) {}
+
+    ~Deps() { delete[] nodes; }
+
     TimeStamp mtime;
     int node_count;
     Node** nodes;
   };
+
   LoadStatus Load(const std::string& path, State* state, std::string* err);
   Deps* GetDeps(Node* node);
   Node* GetFirstReverseDepsNode(Node* node);
@@ -101,6 +104,7 @@ struct DepsLog {
 
   /// Used for tests.
   const std::vector<Node*>& nodes() const { return nodes_; }
+
   const std::vector<Deps*>& deps() const { return deps_; }
 
  private:

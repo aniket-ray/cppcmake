@@ -38,7 +38,7 @@ struct ScopedMetric {
   explicit ScopedMetric(Metric* metric);
   ~ScopedMetric();
 
-private:
+ private:
   Metric* metric_;
   /// Timestamp when the measurement started.
   /// Value is platform-dependent.
@@ -52,7 +52,7 @@ struct Metrics {
   /// Print a summary report to stdout.
   void Report();
 
-private:
+ private:
   std::vector<Metric*> metrics_;
 };
 
@@ -80,18 +80,16 @@ struct Stopwatch {
 
 /// The primary interface to metrics.  Use METRIC_RECORD("foobar") at the top
 /// of a function to get timing stats recorded for each call of the function.
-#define METRIC_RECORD(name)                                             \
-  static Metric* metrics_h_metric =                                     \
-      g_metrics ? g_metrics->NewMetric(name) : NULL;                    \
+#define METRIC_RECORD(name)                                                        \
+  static Metric* metrics_h_metric = g_metrics ? g_metrics->NewMetric(name) : NULL; \
   ScopedMetric metrics_h_scoped(metrics_h_metric);
 
 /// A variant of METRIC_RECORD that doesn't record anything if |condition|
 /// is false.
-#define METRIC_RECORD_IF(name, condition)            \
-  static Metric* metrics_h_metric =                  \
-      g_metrics ? g_metrics->NewMetric(name) : NULL; \
+#define METRIC_RECORD_IF(name, condition)                                          \
+  static Metric* metrics_h_metric = g_metrics ? g_metrics->NewMetric(name) : NULL; \
   ScopedMetric metrics_h_scoped((condition) ? metrics_h_metric : NULL);
 
 extern Metrics* g_metrics;
 
-#endif // NINJA_METRICS_H_
+#endif  // NINJA_METRICS_H_

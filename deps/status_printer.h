@@ -29,8 +29,7 @@ struct StatusPrinter : Status {
   virtual void EdgeRemovedFromPlan(const Edge* edge);
 
   virtual void BuildEdgeStarted(const Edge* edge, int64_t start_time_millis);
-  virtual void BuildEdgeFinished(Edge* edge, int64_t start_time_millis,
-                                 int64_t end_time_millis, bool success,
+  virtual void BuildEdgeFinished(Edge* edge, int64_t start_time_millis, int64_t end_time_millis, bool success,
                                  const std::string& output);
   virtual void BuildLoadDyndeps();
   virtual void BuildStarted();
@@ -47,8 +46,7 @@ struct StatusPrinter : Status {
   /// placeholders.
   /// @param progress_status_format The format of the progress status.
   /// @param status The status of the edge.
-  std::string FormatProgressStatus(const char* progress_status_format,
-                                   int64_t time_millis) const;
+  std::string FormatProgressStatus(const char* progress_status_format, int64_t time_millis) const;
 
  private:
   void PrintStatus(const Edge* edge, int64_t time_millis);

@@ -26,8 +26,7 @@ struct DepfileParserOptions {
 
 /// Parser for the dependency information emitted by gcc's -M flags.
 struct DepfileParser {
-  explicit DepfileParser(DepfileParserOptions options =
-                         DepfileParserOptions());
+  explicit DepfileParser(DepfileParserOptions options = DepfileParserOptions());
 
   /// Parse an input file.  Input must be NUL-terminated.
   /// Warning: may mutate the content in-place and parsed StringPieces are
@@ -39,4 +38,4 @@ struct DepfileParser {
   DepfileParserOptions options_;
 };
 
-#endif // NINJA_DEPFILE_PARSER_H_
+#endif  // NINJA_DEPFILE_PARSER_H_

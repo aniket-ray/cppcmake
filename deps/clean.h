@@ -19,8 +19,8 @@
 #include <string>
 
 #include "build.h"
-#include "dyndep.h"
 #include "build_log.h"
+#include "dyndep.h"
 
 struct State;
 struct Node;
@@ -29,9 +29,7 @@ struct DiskInterface;
 
 struct Cleaner {
   /// Build a cleaner object with the given @a disk_interface
-  Cleaner(State* state,
-          const BuildConfig& config,
-          DiskInterface* disk_interface);
+  Cleaner(State* state, const BuildConfig& config, DiskInterface* disk_interface);
 
   /// Clean the given @a target and all the file built for it.
   /// @return non-zero if an error occurs.
@@ -63,14 +61,11 @@ struct Cleaner {
   int CleanDead(const BuildLog::Entries& entries);
 
   /// @return the number of file cleaned.
-  int cleaned_files_count() const {
-    return cleaned_files_count_;
-  }
+  int cleaned_files_count() const { return cleaned_files_count_; }
 
   /// @return whether the cleaner is in verbose mode.
   bool IsVerbose() const {
-    return (config_.verbosity != BuildConfig::QUIET
-            && (config_.verbosity == BuildConfig::VERBOSE || config_.dry_run));
+    return (config_.verbosity != BuildConfig::QUIET && (config_.verbosity == BuildConfig::VERBOSE || config_.dry_run));
   }
 
  private:

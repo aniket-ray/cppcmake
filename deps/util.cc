@@ -15,12 +15,12 @@
 #include "util.h"
 
 #ifdef __CYGWIN__
-#include <windows.h>
 #include <io.h>
-#elif defined( _WIN32)
 #include <windows.h>
+#elif defined(_WIN32)
 #include <io.h>
 #include <share.h>
+#include <windows.h>
 #endif
 
 #include <assert.h>
@@ -34,8 +34,8 @@
 #include <sys/types.h>
 
 #ifndef _WIN32
-#include <unistd.h>
 #include <sys/time.h>
+#include <unistd.h>
 #endif
 
 #include <vector>
@@ -43,8 +43,8 @@
 #if defined(__APPLE__) || defined(__FreeBSD__)
 #include <sys/sysctl.h>
 #elif defined(__SVR4) && defined(__sun)
-#include <unistd.h>
 #include <sys/loadavg.h>
+#include <unistd.h>
 #elif defined(_AIX) && !defined(__PASE__)
 #include <libperfstat.h>
 #elif defined(__linux__) || defined(__GLIBC__)
@@ -171,8 +171,7 @@ void CanonicalizePath(char* path, size_t* len, uint64_t* slash_bits) {
     // For relative paths, skip any leading ../ as these are quite common
     // to reference source files in build plans, and doing this here makes
     // the loop work below faster in general.
-    while (src + 3 <= end && src[0] == '.' && src[1] == '.' &&
-           IsPathSeparator(src[2])) {
+    while (src + 3 <= end && src[0] == '.' && src[1] == '.' && IsPathSeparator(src[2])) {
       src += 3;
       dst += 3;
     }
@@ -187,8 +186,7 @@ void CanonicalizePath(char* path, size_t* len, uint64_t* slash_bits) {
     // Use memchr() for faster lookups thanks to optimized C library
     // implementation. `hyperfine canon_perftest` shows a significant
     // difference (e,g, 484ms vs 437ms).
-    const char* next_sep =
-        static_cast<const char*>(::memchr(src, '/', end - src));
+    const char* next_sep = static_cast<const char*>(::memchr(src, '/', end - src));
     if (!next_sep) {
       // This is the last component, will be handled out of the loop.
       break;
@@ -308,9 +306,12 @@ void CanonicalizePath(char* path, size_t* len, uint64_t* slash_bits) {
 }
 
 static inline bool IsKnownShellSafeCharacter(char ch) {
-  if ('A' <= ch && ch <= 'Z') return true;
-  if ('a' <= ch && ch <= 'z') return true;
-  if ('0' <= ch && ch <= '9') return true;
+  if ('A' <= ch && ch <= 'Z')
+    return true;
+  if ('a' <= ch && ch <= 'z')
+    return true;
+  if ('0' <= ch && ch <= '9')
+    return true;
 
   switch (ch) {
     case '_':
@@ -336,14 +337,16 @@ static inline bool IsKnownWin32SafeCharacter(char ch) {
 
 static inline bool StringNeedsShellEscaping(const string& input) {
   for (size_t i = 0; i < input.size(); ++i) {
-    if (!IsKnownShellSafeCharacter(input[i])) return true;
+    if (!IsKnownShellSafeCharacter(input[i]))
+      return true;
   }
   return false;
 }
 
 static inline bool StringNeedsWin32Escaping(const string& input) {
   for (size_t i = 0; i < input.size(); ++i) {
-    if (!IsKnownWin32SafeCharacter(input[i])) return true;
+    if (!IsKnownWin32SafeCharacter(input[i]))
+      return true;
   }
   return false;
 }
@@ -362,8 +365,7 @@ void GetShellEscapedString(const string& input, string* result) {
   result->push_back(kQuote);
 
   string::const_iterator span_begin = input.begin();
-  for (string::const_iterator it = input.begin(), end = input.end(); it != end;
-       ++it) {
+  for (string::const_iterator it = input.begin(), end = input.end(); it != end; ++it) {
     if (*it == kQuote) {
       result->append(span_begin, it);
       result->append(kEscapeSequence);
@@ -373,7 +375,6 @@ void GetShellEscapedString(const string& input, string* result) {
   result->append(span_begin, input.end());
   result->push_back(kQuote);
 }
-
 
 void GetWin32EscapedString(const string& input, string* result) {
   assert(result);
@@ -388,8 +389,7 @@ void GetWin32EscapedString(const string& input, string* result) {
   result->push_back(kQuote);
   size_t consecutive_backslash_count = 0;
   string::const_iterator span_begin = input.begin();
-  for (string::const_iterator it = input.begin(), end = input.end(); it != end;
-       ++it) {
+  for (string::const_iterator it = input.begin(), end = input.end(); it != end; ++it) {
     switch (*it) {
       case kBackslash:
         ++consecutive_backslash_count;
@@ -415,8 +415,8 @@ int ReadFile(const string& path, string* contents, string* err) {
   // This makes a ninja run on a set of 1500 manifest files about 4% faster
   // than using the generic fopen code below.
   err->clear();
-  HANDLE f = ::CreateFileA(path.c_str(), GENERIC_READ, FILE_SHARE_READ, NULL,
-                           OPEN_EXISTING, FILE_FLAG_SEQUENTIAL_SCAN, NULL);
+  HANDLE f =
+      ::CreateFileA(path.c_str(), GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_EXISTING, FILE_FLAG_SEQUENTIAL_SCAN, NULL);
   if (f == INVALID_HANDLE_VALUE) {
     err->assign(GetLastErrorString());
     return -ENOENT;
@@ -485,25 +485,21 @@ void SetCloseOnExec(int fd) {
       perror("fcntl(F_SETFD)");
   }
 #else
-  HANDLE hd = (HANDLE) _get_osfhandle(fd);
-  if (! SetHandleInformation(hd, HANDLE_FLAG_INHERIT, 0)) {
+  HANDLE hd = (HANDLE)_get_osfhandle(fd);
+  if (!SetHandleInformation(hd, HANDLE_FLAG_INHERIT, 0)) {
     fprintf(stderr, "SetHandleInformation(): %s", GetLastErrorString().c_str());
   }
 #endif  // ! _WIN32
 }
 
-
-const char* SpellcheckStringV(const string& text,
-                              const vector<const char*>& words) {
+const char* SpellcheckStringV(const string& text, const vector<const char*>& words) {
   const bool kAllowReplacements = true;
   const int kMaxValidEditDistance = 3;
 
   int min_distance = kMaxValidEditDistance + 1;
   const char* result = NULL;
-  for (vector<const char*>::const_iterator i = words.begin();
-       i != words.end(); ++i) {
-    int distance = EditDistance(*i, text, kAllowReplacements,
-                                kMaxValidEditDistance);
+  for (vector<const char*>::const_iterator i = words.begin(); i != words.end(); ++i) {
+    int distance = EditDistance(*i, text, kAllowReplacements, kMaxValidEditDistance);
     if (distance < min_distance) {
       min_distance = distance;
       result = *i;
@@ -530,16 +526,8 @@ string GetLastErrorString() {
   DWORD err = GetLastError();
 
   char* msg_buf;
-  FormatMessageA(
-        FORMAT_MESSAGE_ALLOCATE_BUFFER |
-        FORMAT_MESSAGE_FROM_SYSTEM |
-        FORMAT_MESSAGE_IGNORE_INSERTS,
-        NULL,
-        err,
-        MAKELANGID(LANG_ENGLISH, SUBLANG_DEFAULT),
-        (char*)&msg_buf,
-        0,
-        NULL);
+  FormatMessageA(FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS, NULL, err,
+                 MAKELANGID(LANG_ENGLISH, SUBLANG_DEFAULT), (char*)&msg_buf, 0, NULL);
 
   if (msg_buf == nullptr) {
     char fallback_msg[128] = {0};
@@ -578,8 +566,10 @@ string StripAnsiEscapeCodes(const string& in) {
     }
 
     // Only strip CSIs for now.
-    if (i + 1 >= in.size()) break;
-    if (in[i + 1] != '[') continue;  // Not a CSI.
+    if (i + 1 >= in.size())
+      break;
+    if (in[i + 1] != '[')
+      continue;  // Not a CSI.
     i += 2;
 
     // Skip everything up to and including the next [a-zA-Z].
@@ -612,6 +602,7 @@ struct MountPoint {
   StringPiece fsType;
   StringPiece mountSource;
   vector<StringPiece> superOptions;
+
   bool parse(const string& line) {
     vector<StringPiece> pieces = SplitStringPiece(line, ' ');
     if (pieces.size() < 10)
@@ -633,13 +624,13 @@ struct MountPoint {
     root = pieces[3];
     mountPoint = pieces[4];
     options = SplitStringPiece(pieces[5], ',');
-    optionalFields =
-        vector<StringPiece>(&pieces[6], &pieces[optionalStart - 1]);
+    optionalFields = vector<StringPiece>(&pieces[6], &pieces[optionalStart - 1]);
     fsType = pieces[optionalStart];
     mountSource = pieces[optionalStart + 1];
     superOptions = SplitStringPiece(pieces[optionalStart + 2], ',');
     return true;
   }
+
   string translate(string& path) const {
     // path must be sub dir of root
     if (path.compare(0, root.len_, root.str_, root.len_) != 0) {
@@ -657,6 +648,7 @@ struct CGroupSubSys {
   int id;
   string name;
   vector<string> subsystems;
+
   bool parse(string& line) {
     size_t first = line.find(':');
     if (first == string::npos)
@@ -668,8 +660,7 @@ struct CGroupSubSys {
     line[second] = '\0';
     id = atoi(line.c_str());
     name = line.substr(second + 1);
-    vector<StringPiece> pieces =
-        SplitStringPiece(StringPiece(line.c_str() + first + 1), ',');
+    vector<StringPiece> pieces = SplitStringPiece(StringPiece(line.c_str() + first + 1), ',');
     for (size_t i = 0; i < pieces.size(); i++) {
       subsystems.push_back(pieces[i].AsString());
     }
@@ -730,8 +721,7 @@ int ParseCPUFromCGroup() {
   std::pair<int64_t, bool> quota = readCount(cpu->second + "/cpu.cfs_quota_us");
   if (!quota.second || quota.first == -1)
     return -1;
-  std::pair<int64_t, bool> period =
-      readCount(cpu->second + "/cpu.cfs_period_us");
+  std::pair<int64_t, bool> period = readCount(cpu->second + "/cpu.cfs_period_us");
   if (!period.second)
     return -1;
   if (period.first == 0)
@@ -747,20 +737,16 @@ int GetProcessorCount() {
   // Need to use GetLogicalProcessorInformationEx to get real core count on
   // machines with >64 cores. See https://stackoverflow.com/a/31209344/21475
   DWORD len = 0;
-  if (!GetLogicalProcessorInformationEx(RelationProcessorCore, nullptr, &len)
-        && GetLastError() == ERROR_INSUFFICIENT_BUFFER) {
+  if (!GetLogicalProcessorInformationEx(RelationProcessorCore, nullptr, &len) &&
+      GetLastError() == ERROR_INSUFFICIENT_BUFFER) {
     std::vector<char> buf(len);
     int cores = 0;
-    if (GetLogicalProcessorInformationEx(RelationProcessorCore,
-          reinterpret_cast<PSYSTEM_LOGICAL_PROCESSOR_INFORMATION_EX>(
-            buf.data()), &len)) {
-      for (DWORD i = 0; i < len; ) {
-        auto info = reinterpret_cast<PSYSTEM_LOGICAL_PROCESSOR_INFORMATION_EX>(
-            buf.data() + i);
-        if (info->Relationship == RelationProcessorCore &&
-            info->Processor.GroupCount == 1) {
-          for (KAFFINITY core_mask = info->Processor.GroupMask[0].Mask;
-               core_mask; core_mask >>= 1) {
+    if (GetLogicalProcessorInformationEx(
+            RelationProcessorCore, reinterpret_cast<PSYSTEM_LOGICAL_PROCESSOR_INFORMATION_EX>(buf.data()), &len)) {
+      for (DWORD i = 0; i < len;) {
+        auto info = reinterpret_cast<PSYSTEM_LOGICAL_PROCESSOR_INFORMATION_EX>(buf.data() + i);
+        if (info->Relationship == RelationProcessorCore && info->Processor.GroupCount == 1) {
+          for (KAFFINITY core_mask = info->Processor.GroupMask[0].Mask; core_mask; core_mask >>= 1) {
             cores += (core_mask & 1);
           }
         }
@@ -778,10 +764,8 @@ int GetProcessorCount() {
   JOBOBJECT_CPU_RATE_CONTROL_INFORMATION info;
   // reference:
   // https://docs.microsoft.com/en-us/windows/win32/api/winnt/ns-winnt-jobobject_cpu_rate_control_information
-  if (QueryInformationJobObject(NULL, JobObjectCpuRateControlInformation, &info,
-                                sizeof(info), NULL)) {
-    if (info.ControlFlags & (JOB_OBJECT_CPU_RATE_CONTROL_ENABLE |
-                             JOB_OBJECT_CPU_RATE_CONTROL_HARD_CAP)) {
+  if (QueryInformationJobObject(NULL, JobObjectCpuRateControlInformation, &info, sizeof(info), NULL)) {
+    if (info.ControlFlags & (JOB_OBJECT_CPU_RATE_CONTROL_ENABLE | JOB_OBJECT_CPU_RATE_CONTROL_HARD_CAP)) {
       return cpuCount * info.CpuRate / 10000;
     }
   }
@@ -798,8 +782,7 @@ int GetProcessorCount() {
 #if defined(__FreeBSD__)
   cpuset_t mask;
   CPU_ZERO(&mask);
-  if (cpuset_getaffinity(CPU_LEVEL_WHICH, CPU_WHICH_TID, -1, sizeof(mask),
-    &mask) == 0) {
+  if (cpuset_getaffinity(CPU_LEVEL_WHICH, CPU_WHICH_TID, -1, sizeof(mask), &mask) == 0) {
     return CPU_COUNT(&mask);
   }
 #elif defined(CPU_COUNT)
@@ -808,15 +791,16 @@ int GetProcessorCount() {
     schedCount = CPU_COUNT(&set);
   }
 #endif
-  if (cgroupCount >= 0 && schedCount >= 0) return std::min(cgroupCount, schedCount);
-  if (cgroupCount < 0 && schedCount < 0) return sysconf(_SC_NPROCESSORS_ONLN);
+  if (cgroupCount >= 0 && schedCount >= 0)
+    return std::min(cgroupCount, schedCount);
+  if (cgroupCount < 0 && schedCount < 0)
+    return sysconf(_SC_NPROCESSORS_ONLN);
   return std::max(cgroupCount, schedCount);
 #endif
 }
 
 #if defined(_WIN32) || defined(__CYGWIN__)
-static double CalculateProcessorLoad(uint64_t idle_ticks, uint64_t total_ticks)
-{
+static double CalculateProcessorLoad(uint64_t idle_ticks, uint64_t total_ticks) {
   static uint64_t previous_idle_ticks = 0;
   static uint64_t previous_total_ticks = 0;
   static double previous_load = -0.0;
@@ -832,12 +816,11 @@ static double CalculateProcessorLoad(uint64_t idle_ticks, uint64_t total_ticks)
     load = previous_load;
   } else {
     // Calculate load.
-    double idle_to_total_ratio =
-        ((double)idle_ticks_since_last_time) / total_ticks_since_last_time;
+    double idle_to_total_ratio = ((double)idle_ticks_since_last_time) / total_ticks_since_last_time;
     double load_since_last_call = 1.0 - idle_to_total_ratio;
 
     // Filter/smooth result when possible.
-    if(previous_load > 0) {
+    if (previous_load > 0) {
       load = 0.9 * previous_load + 0.1 * load_since_last_call;
     } else {
       load = load_since_last_call;
@@ -851,25 +834,22 @@ static double CalculateProcessorLoad(uint64_t idle_ticks, uint64_t total_ticks)
   return load;
 }
 
-static uint64_t FileTimeToTickCount(const FILETIME & ft)
-{
+static uint64_t FileTimeToTickCount(const FILETIME& ft) {
   uint64_t high = (((uint64_t)(ft.dwHighDateTime)) << 32);
-  uint64_t low  = ft.dwLowDateTime;
+  uint64_t low = ft.dwLowDateTime;
   return (high | low);
 }
 
 double GetLoadAverage() {
   FILETIME idle_time, kernel_time, user_time;
-  BOOL get_system_time_succeeded =
-      GetSystemTimes(&idle_time, &kernel_time, &user_time);
+  BOOL get_system_time_succeeded = GetSystemTimes(&idle_time, &kernel_time, &user_time);
 
   double posix_compatible_load;
   if (get_system_time_succeeded) {
     uint64_t idle_ticks = FileTimeToTickCount(idle_time);
 
     // kernel_time from GetSystemTimes already includes idle_time.
-    uint64_t total_ticks =
-        FileTimeToTickCount(kernel_time) + FileTimeToTickCount(user_time);
+    uint64_t total_ticks = FileTimeToTickCount(kernel_time) + FileTimeToTickCount(user_time);
 
     double processor_load = CalculateProcessorLoad(idle_ticks, total_ticks);
     posix_compatible_load = processor_load * GetProcessorCount();
@@ -903,11 +883,11 @@ double GetLoadAverage() {
 }
 #elif defined(__HAIKU__)
 double GetLoadAverage() {
-    return -0.0f;
+  return -0.0f;
 }
 #else
 double GetLoadAverage() {
-  double loadavg[3] = { 0.0f, 0.0f, 0.0f };
+  double loadavg[3] = {0.0f, 0.0f, 0.0f};
   if (getloadavg(loadavg, 3) < 0) {
     // Maybe we should return an error here or the availability of
     // getloadavg(3) should be checked when ninja is configured.
@@ -915,30 +895,31 @@ double GetLoadAverage() {
   }
   return loadavg[0];
 }
-#endif // _WIN32
+#endif  // _WIN32
 
 string ElideMiddle(const string& str, size_t width) {
   switch (width) {
-      case 0: return "";
-      case 1: return ".";
-      case 2: return "..";
-      case 3: return "...";
+    case 0:
+      return "";
+    case 1:
+      return ".";
+    case 2:
+      return "..";
+    case 3:
+      return "...";
   }
   const int kMargin = 3;  // Space for "...".
   string result = str;
   if (result.size() > width) {
     size_t elide_size = (width - kMargin) / 2;
-    result = result.substr(0, elide_size)
-      + "..."
-      + result.substr(result.size() - elide_size, elide_size);
+    result = result.substr(0, elide_size) + "..." + result.substr(result.size() - elide_size, elide_size);
   }
   return result;
 }
 
 bool Truncate(const string& path, size_t size, string* err) {
 #ifdef _WIN32
-  int fh = _sopen(path.c_str(), _O_RDWR | _O_CREAT, _SH_DENYNO,
-                  _S_IREAD | _S_IWRITE);
+  int fh = _sopen(path.c_str(), _O_RDWR | _O_CREAT, _SH_DENYNO, _S_IREAD | _S_IWRITE);
   int success = _chsize(fh, size);
   _close(fh);
 #else

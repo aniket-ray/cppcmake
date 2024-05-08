@@ -22,10 +22,10 @@
 #define ENABLE_VIRTUAL_TERMINAL_PROCESSING 0x4
 #endif
 #else
-#include <unistd.h>
 #include <sys/ioctl.h>
-#include <termios.h>
 #include <sys/time.h>
+#include <termios.h>
+#include <unistd.h>
 #endif
 
 #include "util.h"
@@ -82,20 +82,18 @@ void LinePrinter::Print(string to_print, LineType type) {
     GetConsoleScreenBufferInfo(console_, &csbi);
 
     to_print = ElideMiddle(to_print, static_cast<size_t>(csbi.dwSize.X));
-    if (supports_color_) {  // this means ENABLE_VIRTUAL_TERMINAL_PROCESSING
-                            // succeeded
+    if (supports_color_) {                   // this means ENABLE_VIRTUAL_TERMINAL_PROCESSING
+                                             // succeeded
       printf("%s\x1B[K", to_print.c_str());  // Clear to end of line.
       fflush(stdout);
     } else {
       // We don't want to have the cursor spamming back and forth, so instead of
       // printf use WriteConsoleOutput which updates the contents of the buffer,
       // but doesn't move the cursor position.
-      COORD buf_size = { csbi.dwSize.X, 1 };
-      COORD zero_zero = { 0, 0 };
-      SMALL_RECT target = { csbi.dwCursorPosition.X, csbi.dwCursorPosition.Y,
-                            static_cast<SHORT>(csbi.dwCursorPosition.X +
-                                               csbi.dwSize.X - 1),
-                            csbi.dwCursorPosition.Y };
+      COORD buf_size = {csbi.dwSize.X, 1};
+      COORD zero_zero = {0, 0};
+      SMALL_RECT target = {csbi.dwCursorPosition.X, csbi.dwCursorPosition.Y,
+                           static_cast<SHORT>(csbi.dwCursorPosition.X + csbi.dwSize.X - 1), csbi.dwCursorPosition.Y};
       vector<CHAR_INFO> char_data(csbi.dwSize.X);
       for (size_t i = 0; i < static_cast<size_t>(csbi.dwSize.X); ++i) {
         char_data[i].Char.AsciiChar = i < to_print.size() ? to_print[i] : ' ';

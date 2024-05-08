@@ -15,8 +15,8 @@
 #include "clean.h"
 #include "build.h"
 
-#include "util.h"
 #include "test.h"
+#include "util.h"
 
 #ifndef _WIN32
 #include <unistd.h>
@@ -31,17 +31,16 @@ const char kTestFilename[] = "CleanTest-tempfile";
 struct CleanTest : public StateTestWithBuiltinRules {
   VirtualFileSystem fs_;
   BuildConfig config_;
-  virtual void SetUp() {
-    config_.verbosity = BuildConfig::QUIET;
-  }
+
+  virtual void SetUp() { config_.verbosity = BuildConfig::QUIET; }
 };
 
 TEST_F(CleanTest, CleanAll) {
   ASSERT_NO_FATAL_FAILURE(AssertParse(&state_,
-"build in1: cat src1\n"
-"build out1: cat in1\n"
-"build in2: cat src2\n"
-"build out2: cat in2\n"));
+                                      "build in1: cat src1\n"
+                                      "build out1: cat in1\n"
+                                      "build in2: cat src2\n"
+                                      "build out2: cat in2\n"));
   fs_.Create("in1", "");
   fs_.Create("out1", "");
   fs_.Create("in2", "");
@@ -69,10 +68,10 @@ TEST_F(CleanTest, CleanAll) {
 
 TEST_F(CleanTest, CleanAllDryRun) {
   ASSERT_NO_FATAL_FAILURE(AssertParse(&state_,
-"build in1: cat src1\n"
-"build out1: cat in1\n"
-"build in2: cat src2\n"
-"build out2: cat in2\n"));
+                                      "build in1: cat src1\n"
+                                      "build out1: cat in1\n"
+                                      "build in2: cat src2\n"
+                                      "build out2: cat in2\n"));
   fs_.Create("in1", "");
   fs_.Create("out1", "");
   fs_.Create("in2", "");
@@ -101,10 +100,10 @@ TEST_F(CleanTest, CleanAllDryRun) {
 
 TEST_F(CleanTest, CleanTarget) {
   ASSERT_NO_FATAL_FAILURE(AssertParse(&state_,
-"build in1: cat src1\n"
-"build out1: cat in1\n"
-"build in2: cat src2\n"
-"build out2: cat in2\n"));
+                                      "build in1: cat src1\n"
+                                      "build out1: cat in1\n"
+                                      "build in2: cat src2\n"
+                                      "build out2: cat in2\n"));
   fs_.Create("in1", "");
   fs_.Create("out1", "");
   fs_.Create("in2", "");
@@ -132,10 +131,10 @@ TEST_F(CleanTest, CleanTarget) {
 
 TEST_F(CleanTest, CleanTargetDryRun) {
   ASSERT_NO_FATAL_FAILURE(AssertParse(&state_,
-"build in1: cat src1\n"
-"build out1: cat in1\n"
-"build in2: cat src2\n"
-"build out2: cat in2\n"));
+                                      "build in1: cat src1\n"
+                                      "build out1: cat in1\n"
+                                      "build in2: cat src2\n"
+                                      "build out2: cat in2\n"));
   fs_.Create("in1", "");
   fs_.Create("out1", "");
   fs_.Create("in2", "");
@@ -164,12 +163,12 @@ TEST_F(CleanTest, CleanTargetDryRun) {
 
 TEST_F(CleanTest, CleanRule) {
   ASSERT_NO_FATAL_FAILURE(AssertParse(&state_,
-"rule cat_e\n"
-"  command = cat -e $in > $out\n"
-"build in1: cat_e src1\n"
-"build out1: cat in1\n"
-"build in2: cat_e src2\n"
-"build out2: cat in2\n"));
+                                      "rule cat_e\n"
+                                      "  command = cat -e $in > $out\n"
+                                      "build in1: cat_e src1\n"
+                                      "build out1: cat in1\n"
+                                      "build in2: cat_e src2\n"
+                                      "build out2: cat in2\n"));
   fs_.Create("in1", "");
   fs_.Create("out1", "");
   fs_.Create("in2", "");
@@ -197,12 +196,12 @@ TEST_F(CleanTest, CleanRule) {
 
 TEST_F(CleanTest, CleanRuleDryRun) {
   ASSERT_NO_FATAL_FAILURE(AssertParse(&state_,
-"rule cat_e\n"
-"  command = cat -e $in > $out\n"
-"build in1: cat_e src1\n"
-"build out1: cat in1\n"
-"build in2: cat_e src2\n"
-"build out2: cat in2\n"));
+                                      "rule cat_e\n"
+                                      "  command = cat -e $in > $out\n"
+                                      "build in1: cat_e src1\n"
+                                      "build out1: cat in1\n"
+                                      "build in2: cat_e src2\n"
+                                      "build out2: cat in2\n"));
   fs_.Create("in1", "");
   fs_.Create("out1", "");
   fs_.Create("in2", "");
@@ -231,11 +230,11 @@ TEST_F(CleanTest, CleanRuleDryRun) {
 
 TEST_F(CleanTest, CleanRuleGenerator) {
   ASSERT_NO_FATAL_FAILURE(AssertParse(&state_,
-"rule regen\n"
-"  command = cat $in > $out\n"
-"  generator = 1\n"
-"build out1: cat in1\n"
-"build out2: regen in2\n"));
+                                      "rule regen\n"
+                                      "  command = cat $in > $out\n"
+                                      "  generator = 1\n"
+                                      "build out1: cat in1\n"
+                                      "build out2: regen in2\n"));
   fs_.Create("out1", "");
   fs_.Create("out2", "");
 
@@ -253,10 +252,10 @@ TEST_F(CleanTest, CleanRuleGenerator) {
 
 TEST_F(CleanTest, CleanDepFile) {
   ASSERT_NO_FATAL_FAILURE(AssertParse(&state_,
-"rule cc\n"
-"  command = cc $in > $out\n"
-"  depfile = $out.d\n"
-"build out1: cc in1\n"));
+                                      "rule cc\n"
+                                      "  command = cc $in > $out\n"
+                                      "  depfile = $out.d\n"
+                                      "build out1: cc in1\n"));
   fs_.Create("out1", "");
   fs_.Create("out1.d", "");
 
@@ -268,10 +267,10 @@ TEST_F(CleanTest, CleanDepFile) {
 
 TEST_F(CleanTest, CleanDepFileOnCleanTarget) {
   ASSERT_NO_FATAL_FAILURE(AssertParse(&state_,
-"rule cc\n"
-"  command = cc $in > $out\n"
-"  depfile = $out.d\n"
-"build out1: cc in1\n"));
+                                      "rule cc\n"
+                                      "  command = cc $in > $out\n"
+                                      "  depfile = $out.d\n"
+                                      "build out1: cc in1\n"));
   fs_.Create("out1", "");
   fs_.Create("out1.d", "");
 
@@ -283,10 +282,10 @@ TEST_F(CleanTest, CleanDepFileOnCleanTarget) {
 
 TEST_F(CleanTest, CleanDepFileOnCleanRule) {
   ASSERT_NO_FATAL_FAILURE(AssertParse(&state_,
-"rule cc\n"
-"  command = cc $in > $out\n"
-"  depfile = $out.d\n"
-"build out1: cc in1\n"));
+                                      "rule cc\n"
+                                      "  command = cc $in > $out\n"
+                                      "  depfile = $out.d\n"
+                                      "build out1: cc in1\n"));
   fs_.Create("out1", "");
   fs_.Create("out1.d", "");
 
@@ -300,14 +299,12 @@ TEST_F(CleanTest, CleanDyndep) {
   // Verify that a dyndep file can be loaded to discover a new output
   // to be cleaned.
   ASSERT_NO_FATAL_FAILURE(AssertParse(&state_,
-"build out: cat in || dd\n"
-"  dyndep = dd\n"
-  ));
+                                      "build out: cat in || dd\n"
+                                      "  dyndep = dd\n"));
   fs_.Create("in", "");
   fs_.Create("dd",
-"ninja_dyndep_version = 1\n"
-"build out | out.imp: dyndep\n"
-);
+             "ninja_dyndep_version = 1\n"
+             "build out | out.imp: dyndep\n");
   fs_.Create("out", "");
   fs_.Create("out.imp", "");
 
@@ -326,9 +323,8 @@ TEST_F(CleanTest, CleanDyndep) {
 TEST_F(CleanTest, CleanDyndepMissing) {
   // Verify that a missing dyndep file is tolerated.
   ASSERT_NO_FATAL_FAILURE(AssertParse(&state_,
-"build out: cat in || dd\n"
-"  dyndep = dd\n"
-  ));
+                                      "build out: cat in || dd\n"
+                                      "  dyndep = dd\n"));
   fs_.Create("in", "");
   fs_.Create("out", "");
   fs_.Create("out.imp", "");
@@ -347,12 +343,12 @@ TEST_F(CleanTest, CleanDyndepMissing) {
 
 TEST_F(CleanTest, CleanRspFile) {
   ASSERT_NO_FATAL_FAILURE(AssertParse(&state_,
-"rule cc\n"
-"  command = cc $in > $out\n"
-"  rspfile = $rspfile\n"
-"  rspfile_content=$in\n"
-"build out1: cc in1\n"
-"  rspfile = cc1.rsp\n"));
+                                      "rule cc\n"
+                                      "  command = cc $in > $out\n"
+                                      "  rspfile = $rspfile\n"
+                                      "  rspfile_content=$in\n"
+                                      "build out1: cc in1\n"
+                                      "  rspfile = cc1.rsp\n"));
   fs_.Create("out1", "");
   fs_.Create("cc1.rsp", "");
 
@@ -364,17 +360,16 @@ TEST_F(CleanTest, CleanRspFile) {
 
 TEST_F(CleanTest, CleanRsp) {
   ASSERT_NO_FATAL_FAILURE(AssertParse(&state_,
-"rule cat_rsp \n"
-"  command = cat $rspfile > $out\n"
-"  rspfile = $rspfile\n"
-"  rspfile_content = $in\n"
-"build in1: cat src1\n"
-"build out1: cat in1\n"
-"build in2: cat_rsp src2\n"
-"  rspfile=in2.rsp\n"
-"build out2: cat_rsp in2\n"
-"  rspfile=out2.rsp\n"
-));
+                                      "rule cat_rsp \n"
+                                      "  command = cat $rspfile > $out\n"
+                                      "  rspfile = $rspfile\n"
+                                      "  rspfile_content = $in\n"
+                                      "build in1: cat src1\n"
+                                      "build out1: cat in1\n"
+                                      "build in2: cat_rsp src2\n"
+                                      "  rspfile=in2.rsp\n"
+                                      "build out2: cat_rsp in2\n"
+                                      "  rspfile=out2.rsp\n"));
   fs_.Create("in1", "");
   fs_.Create("out1", "");
   fs_.Create("in2.rsp", "");
@@ -404,8 +399,7 @@ TEST_F(CleanTest, CleanRsp) {
 }
 
 TEST_F(CleanTest, CleanFailure) {
-  ASSERT_NO_FATAL_FAILURE(AssertParse(&state_,
-                                      "build dir: cat src1\n"));
+  ASSERT_NO_FATAL_FAILURE(AssertParse(&state_, "build dir: cat src1\n"));
   fs_.MakeDir("dir");
   Cleaner cleaner(&state_, config_, &fs_);
   EXPECT_NE(0, cleaner.CleanAll());
@@ -414,9 +408,9 @@ TEST_F(CleanTest, CleanFailure) {
 TEST_F(CleanTest, CleanPhony) {
   string err;
   ASSERT_NO_FATAL_FAILURE(AssertParse(&state_,
-"build phony: phony t1 t2\n"
-"build t1: cat\n"
-"build t2: cat\n"));
+                                      "build phony: phony t1 t2\n"
+                                      "build t1: cat\n"
+                                      "build t2: cat\n"));
 
   fs_.Create("phony", "");
   fs_.Create("t1", "");
@@ -439,16 +433,15 @@ TEST_F(CleanTest, CleanPhony) {
 
 TEST_F(CleanTest, CleanDepFileAndRspFileWithSpaces) {
   ASSERT_NO_FATAL_FAILURE(AssertParse(&state_,
-"rule cc_dep\n"
-"  command = cc $in > $out\n"
-"  depfile = $out.d\n"
-"rule cc_rsp\n"
-"  command = cc $in > $out\n"
-"  rspfile = $out.rsp\n"
-"  rspfile_content = $in\n"
-"build out$ 1: cc_dep in$ 1\n"
-"build out$ 2: cc_rsp in$ 1\n"
-));
+                                      "rule cc_dep\n"
+                                      "  command = cc $in > $out\n"
+                                      "  depfile = $out.d\n"
+                                      "rule cc_rsp\n"
+                                      "  command = cc $in > $out\n"
+                                      "  rspfile = $out.rsp\n"
+                                      "  rspfile_content = $in\n"
+                                      "build out$ 1: cc_dep in$ 1\n"
+                                      "build out$ 2: cc_rsp in$ 1\n"));
   fs_.Create("out 1", "");
   fs_.Create("out 2", "");
   fs_.Create("out 1.d", "");
@@ -466,29 +459,26 @@ TEST_F(CleanTest, CleanDepFileAndRspFileWithSpaces) {
   EXPECT_EQ(0, fs_.Stat("out 2.rsp", &err));
 }
 
-struct CleanDeadTest : public CleanTest, public BuildLogUser{
+struct CleanDeadTest : public CleanTest, public BuildLogUser {
   virtual void SetUp() {
     // In case a crashing test left a stale file behind.
     unlink(kTestFilename);
     CleanTest::SetUp();
   }
-  virtual void TearDown() {
-    unlink(kTestFilename);
-  }
+
+  virtual void TearDown() { unlink(kTestFilename); }
+
   virtual bool IsPathDead(StringPiece) const { return false; }
 };
 
 TEST_F(CleanDeadTest, CleanDead) {
   State state;
   ASSERT_NO_FATAL_FAILURE(AssertParse(&state,
-"rule cat\n"
-"  command = cat $in > $out\n"
-"build out1: cat in\n"
-"build out2: cat in\n"
-));
-  ASSERT_NO_FATAL_FAILURE(AssertParse(&state_,
-"build out2: cat in\n"
-));
+                                      "rule cat\n"
+                                      "  command = cat $in > $out\n"
+                                      "build out1: cat in\n"
+                                      "build out2: cat in\n"));
+  ASSERT_NO_FATAL_FAILURE(AssertParse(&state_, "build out2: cat in\n"));
   fs_.Create("in", "");
   fs_.Create("out1", "");
   fs_.Create("out2", "");
@@ -541,17 +531,14 @@ TEST_F(CleanDeadTest, CleanDead) {
 TEST_F(CleanDeadTest, CleanDeadPreservesInputs) {
   State state;
   ASSERT_NO_FATAL_FAILURE(AssertParse(&state,
-"rule cat\n"
-"  command = cat $in > $out\n"
-"build out1: cat in\n"
-"build out2: cat in\n"
-));
+                                      "rule cat\n"
+                                      "  command = cat $in > $out\n"
+                                      "build out1: cat in\n"
+                                      "build out2: cat in\n"));
   // This manifest does not build out1 anymore, but makes
   // it an implicit input. CleanDead should detect this
   // and preserve it.
-  ASSERT_NO_FATAL_FAILURE(AssertParse(&state_,
-"build out2: cat in | out1\n"
-));
+  ASSERT_NO_FATAL_FAILURE(AssertParse(&state_, "build out2: cat in | out1\n"));
   fs_.Create("in", "");
   fs_.Create("out1", "");
   fs_.Create("out2", "");
