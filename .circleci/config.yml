@@ -9,7 +9,11 @@ jobs:
       - run:
           name: Install dependencies
           command: |
-            echo 12 |apt-get update
+            echo "America/New_York" > /etc/timezone
+            sudo ln -snf /usr/share/zoneinfo/America/New_York /etc/localtime
+            ln -snf /usr/share/zoneinfo/America/New_York /etc/localtime
+            apt-get update
+            DEBIAN_FRONTEND=noninteractive apt-get install -y tzdata
             apt-get install -y clang-14
             apt-get install -y cmake
             apt-get install -y clang-tidy 
@@ -38,3 +42,4 @@ workflows:
       - format_tidy:
           requires:
             - install
+
