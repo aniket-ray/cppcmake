@@ -2,12 +2,15 @@ version: 2.1
 jobs:
   install:
     docker:
-      - image: circleci/cpp:latest
+      - image: ubuntu:latest
     steps:
       - checkout
       - run:
-          name: Install LLVM and Clang
-          command: sudo apt-get update && sudo apt-get install -y clang clang-tidy clang-format
+          name: Install dependencies
+          command: |
+            apt-get update
+            apt-get install -y clang-14
+            apt-get install -y cmake
 
   format&tidy:
     docker:
