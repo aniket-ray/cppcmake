@@ -1,0 +1,32 @@
+version: 2.1
+jobs:
+  install:
+    docker:
+      - image: circleci/cpp:latest
+    steps:
+      - checkout
+      - run:
+          name: Install LLVM and Clang
+          command: sudo apt-get update && sudo apt-get install -y clang clang-tidy clang-format
+
+  format&tidy:
+    docker:
+      - image: circleci/cpp:latest
+    steps:
+      - checkout
+      - run:
+          name: Run Clang-Format
+          command: |
+            find ./src -iname "*.cpp" -o -iname "*.h" | xargs clang-format -i
+            git diff --exit-code
+      - run:
+          name: Run Clang-Tidy
+          command: |
+            find ./src -iname "*.cpp" | xargs clang-tidy -p .
+
+workflows:
+  version: 2
+  build_and_test:
+    jobs:
+      - install
+      - format&tidy
