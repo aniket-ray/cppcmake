@@ -9,10 +9,11 @@ jobs:
       - run:
           name: Install dependencies
           command: |
+            echo "tzdata tzdata/Areas select America" | debconf-set-selections
+            echo "tzdata tzdata/Zones/America select New_York" | debconf-set-selections
+  
             apt-get update
             apt-get install -y tzdata
-            ln -fs /usr/share/zoneinfo/America/New_York /etc/localtime
-            dpkg-reconfigure --frontend noninteractive tzdata
             apt-get install -y clang-14
             apt-get install -y cmake
             apt-get install -y clang-tidy 
