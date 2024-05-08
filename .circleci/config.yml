@@ -1,15 +1,18 @@
 version: 2.1
+
 jobs:
   install:
     docker:
-      - image: ubuntu:latest
+      - image: ubuntu:20.04
     steps:
       - checkout
       - run:
           name: Install dependencies
           command: |
             apt-get update
-            timedatectl set-timezone America/New_York
+            apt-get install -y tzdata
+            ln -fs /usr/share/zoneinfo/America/New_York /etc/localtime
+            dpkg-reconfigure --frontend noninteractive tzdata
             apt-get install -y clang-14
             apt-get install -y cmake
             apt-get install -y clang-tidy 
@@ -17,7 +20,7 @@ jobs:
 
   format_tidy:
     docker:
-      - image: circleci/cpp:latest
+      - image: ubuntu:20.04
     steps:
       - checkout
       - run:
@@ -35,4 +38,6 @@ workflows:
   build_and_test:
     jobs:
       - install
-      - format_tidy
+      - format_tidy:
+          requires:
+            - install
