@@ -14,12 +14,6 @@ jobs:
             apt-get update
             DEBIAN_FRONTEND=noninteractive apt-get install -y tzdata
       - run:
-          name: Add LLVM repository
-          command: |
-            wget -O - https://apt.llvm.org/llvm-snapshot.gpg.key|sudo apt-key add -
-            echo "deb http://apt.llvm.org/focal/ llvm-toolchain-focal-14 main" | sudo tee /etc/apt/sources.list.d/llvm.list
-            apt-get update
-      - run:
           name: Install Clang and other tools
           command: |
             apt-get install -y clang-14
