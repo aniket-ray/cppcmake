@@ -40,8 +40,7 @@ struct StateTestWithBuiltinRules : public testing::Test {
   State state_;
 };
 
-void AssertParse(State* state, const char* input,
-                 ManifestParserOptions = ManifestParserOptions());
+void AssertParse(State* state, const char* input, ManifestParserOptions = ManifestParserOptions());
 void AssertHash(const char* expected, uint64_t actual);
 void VerifyGraph(const State& state);
 
@@ -56,16 +55,13 @@ struct VirtualFileSystem : public DiskInterface {
 
   /// Tick "time" forwards; subsequent file operations will be newer than
   /// previous ones.
-  int Tick() {
-    return ++now_;
-  }
+  int Tick() { return ++now_; }
 
   // DiskInterface
   virtual TimeStamp Stat(const std::string& path, std::string* err) const;
   virtual bool WriteFile(const std::string& path, const std::string& contents);
   virtual bool MakeDir(const std::string& path);
-  virtual Status ReadFile(const std::string& path, std::string* contents,
-                          std::string* err);
+  virtual Status ReadFile(const std::string& path, std::string* contents, std::string* err);
   virtual int RemoveFile(const std::string& path);
 
   /// An entry for a single in-memory file.
@@ -105,6 +101,7 @@ struct ScopedTempDir {
 struct ScopedFilePath {
   /// Constructor just records the file path.
   ScopedFilePath(const std::string& path) : path_(path) {}
+
   ScopedFilePath(const char* path) : path_(path) {}
 
   /// Allow move operations.
@@ -118,7 +115,9 @@ struct ScopedFilePath {
   void Release();
 
   const char* c_str() const { return path_.c_str(); }
+
   const std::string& path() const { return path_; }
+
   bool released() const { return released_; }
 
  private:
@@ -126,4 +125,4 @@ struct ScopedFilePath {
   bool released_ = false;
 };
 
-#endif // NINJA_TEST_H_
+#endif  // NINJA_TEST_H_

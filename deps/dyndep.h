@@ -27,6 +27,7 @@ struct State;
 /// Store dynamically-discovered dependency information for one edge.
 struct Dyndeps {
   Dyndeps() : used_(false), restat_(false) {}
+
   bool used_;
   bool restat_;
   std::vector<Node*> implicit_inputs_;
@@ -37,13 +38,12 @@ struct Dyndeps {
 /// to its dynamically-discovered dependency information.
 /// This is a struct rather than a typedef so that we can
 /// forward-declare it in other headers.
-struct DyndepFile: public std::map<Edge*, Dyndeps> {};
+struct DyndepFile : public std::map<Edge*, Dyndeps> {};
 
 /// DyndepLoader loads dynamically discovered dependencies, as
 /// referenced via the "dyndep" attribute in build files.
 struct DyndepLoader {
-  DyndepLoader(State* state, DiskInterface* disk_interface)
-      : state_(state), disk_interface_(disk_interface) {}
+  DyndepLoader(State* state, DiskInterface* disk_interface) : state_(state), disk_interface_(disk_interface) {}
 
   /// Load a dyndep file from the given node's path and update the
   /// build graph with the new information.  One overload accepts

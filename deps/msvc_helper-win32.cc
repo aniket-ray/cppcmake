@@ -45,10 +45,8 @@ int CLWrapper::Run(const string& command, string* output) {
   security_attributes.bInheritHandle = TRUE;
 
   // Must be inheritable so subprocesses can dup to children.
-  HANDLE nul =
-      CreateFileA("NUL", GENERIC_READ,
-                  FILE_SHARE_READ | FILE_SHARE_WRITE | FILE_SHARE_DELETE,
-                  &security_attributes, OPEN_EXISTING, 0, NULL);
+  HANDLE nul = CreateFileA("NUL", GENERIC_READ, FILE_SHARE_READ | FILE_SHARE_WRITE | FILE_SHARE_DELETE,
+                           &security_attributes, OPEN_EXISTING, 0, NULL);
   if (nul == INVALID_HANDLE_VALUE)
     Fatal("couldn't open nul");
 
@@ -68,14 +66,11 @@ int CLWrapper::Run(const string& command, string* output) {
   startup_info.dwFlags |= STARTF_USESTDHANDLES;
 
   if (!CreateProcessA(NULL, (char*)command.c_str(), NULL, NULL,
-                      /* inherit handles */ TRUE, 0,
-                      env_block_, NULL,
-                      &startup_info, &process_info)) {
+                      /* inherit handles */ TRUE, 0, env_block_, NULL, &startup_info, &process_info)) {
     Win32Fatal("CreateProcess");
   }
 
-  if (!CloseHandle(nul) ||
-      !CloseHandle(stdout_write)) {
+  if (!CloseHandle(nul) || !CloseHandle(stdout_write)) {
     Win32Fatal("CloseHandle");
   }
 
@@ -84,8 +79,7 @@ int CLWrapper::Run(const string& command, string* output) {
   while (read_len) {
     char buf[64 << 10];
     read_len = 0;
-    if (!::ReadFile(stdout_read, buf, sizeof(buf), &read_len, NULL) &&
-        GetLastError() != ERROR_BROKEN_PIPE) {
+    if (!::ReadFile(stdout_read, buf, sizeof(buf), &read_len, NULL) && GetLastError() != ERROR_BROKEN_PIPE) {
       Win32Fatal("ReadFile");
     }
     output->append(buf, read_len);
@@ -98,9 +92,7 @@ int CLWrapper::Run(const string& command, string* output) {
   if (!GetExitCodeProcess(process_info.hProcess, &exit_code))
     Win32Fatal("GetExitCodeProcess");
 
-  if (!CloseHandle(stdout_read) ||
-      !CloseHandle(process_info.hProcess) ||
-      !CloseHandle(process_info.hThread)) {
+  if (!CloseHandle(stdout_read) || !CloseHandle(process_info.hProcess) || !CloseHandle(process_info.hThread)) {
     Win32Fatal("CloseHandle");
   }
 

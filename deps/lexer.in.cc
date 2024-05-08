@@ -73,40 +73,56 @@ void Lexer::Start(StringPiece filename, StringPiece input) {
 
 const char* Lexer::TokenName(Token t) {
   switch (t) {
-  case ERROR:    return "lexing error";
-  case BUILD:    return "'build'";
-  case COLON:    return "':'";
-  case DEFAULT:  return "'default'";
-  case EQUALS:   return "'='";
-  case IDENT:    return "identifier";
-  case INCLUDE:  return "'include'";
-  case INDENT:   return "indent";
-  case NEWLINE:  return "newline";
-  case PIPE2:    return "'||'";
-  case PIPE:     return "'|'";
-  case PIPEAT:   return "'|@'";
-  case POOL:     return "'pool'";
-  case RULE:     return "'rule'";
-  case SUBNINJA: return "'subninja'";
-  case TEOF:     return "eof";
+    case ERROR:
+      return "lexing error";
+    case BUILD:
+      return "'build'";
+    case COLON:
+      return "':'";
+    case DEFAULT:
+      return "'default'";
+    case EQUALS:
+      return "'='";
+    case IDENT:
+      return "identifier";
+    case INCLUDE:
+      return "'include'";
+    case INDENT:
+      return "indent";
+    case NEWLINE:
+      return "newline";
+    case PIPE2:
+      return "'||'";
+    case PIPE:
+      return "'|'";
+    case PIPEAT:
+      return "'|@'";
+    case POOL:
+      return "'pool'";
+    case RULE:
+      return "'rule'";
+    case SUBNINJA:
+      return "'subninja'";
+    case TEOF:
+      return "eof";
   }
   return NULL;  // not reached
 }
 
 const char* Lexer::TokenErrorHint(Token expected) {
   switch (expected) {
-  case COLON:
-    return " ($ also escapes ':')";
-  default:
-    return "";
+    case COLON:
+      return " ($ also escapes ':')";
+    default:
+      return "";
   }
 }
 
 string Lexer::DescribeLastError() {
   if (last_token_) {
     switch (last_token_[0]) {
-    case '\t':
-      return "tabs are not allowed, use spaces";
+      case '\t':
+        return "tabs are not allowed, use spaces";
     }
   }
   return "lexing error";

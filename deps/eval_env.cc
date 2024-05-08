@@ -65,26 +65,16 @@ const EvalString* Rule::GetBinding(const string& key) const {
 
 // static
 bool Rule::IsReservedBinding(const string& var) {
-  return var == "command" ||
-      var == "depfile" ||
-      var == "dyndep" ||
-      var == "description" ||
-      var == "deps" ||
-      var == "generator" ||
-      var == "pool" ||
-      var == "restat" ||
-      var == "rspfile" ||
-      var == "rspfile_content" ||
-      var == "msvc_deps_prefix";
+  return var == "command" || var == "depfile" || var == "dyndep" || var == "description" || var == "deps" ||
+         var == "generator" || var == "pool" || var == "restat" || var == "rspfile" || var == "rspfile_content" ||
+         var == "msvc_deps_prefix";
 }
 
 const map<string, const Rule*>& BindingEnv::GetRules() const {
   return rules_;
 }
 
-string BindingEnv::LookupWithFallback(const string& var,
-                                      const EvalString* eval,
-                                      Env* env) {
+string BindingEnv::LookupWithFallback(const string& var, const EvalString* eval, Env* env) {
   map<string, string>::iterator i = bindings_.find(var);
   if (i != bindings_.end())
     return i->second;
@@ -117,14 +107,14 @@ void EvalString::AddText(StringPiece text) {
     parsed_.push_back(make_pair(text.AsString(), RAW));
   }
 }
+
 void EvalString::AddSpecial(StringPiece text) {
   parsed_.push_back(make_pair(text.AsString(), SPECIAL));
 }
 
 string EvalString::Serialize() const {
   string result;
-  for (TokenList::const_iterator i = parsed_.begin();
-       i != parsed_.end(); ++i) {
+  for (TokenList::const_iterator i = parsed_.begin(); i != parsed_.end(); ++i) {
     result.append("[");
     if (i->second == SPECIAL)
       result.append("$");
@@ -136,8 +126,7 @@ string EvalString::Serialize() const {
 
 string EvalString::Unparse() const {
   string result;
-  for (TokenList::const_iterator i = parsed_.begin();
-       i != parsed_.end(); ++i) {
+  for (TokenList::const_iterator i = parsed_.begin(); i != parsed_.end(); ++i) {
     bool special = (i->second == SPECIAL);
     if (special)
       result.append("${");

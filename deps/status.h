@@ -25,10 +25,8 @@ struct Edge;
 struct Status {
   virtual void EdgeAddedToPlan(const Edge* edge) = 0;
   virtual void EdgeRemovedFromPlan(const Edge* edge) = 0;
-  virtual void BuildEdgeStarted(const Edge* edge,
-                                int64_t start_time_millis) = 0;
-  virtual void BuildEdgeFinished(Edge* edge, int64_t start_time_millis,
-                                 int64_t end_time_millis, bool success,
+  virtual void BuildEdgeStarted(const Edge* edge, int64_t start_time_millis) = 0;
+  virtual void BuildEdgeFinished(Edge* edge, int64_t start_time_millis, int64_t end_time_millis, bool success,
                                  const std::string& output) = 0;
   virtual void BuildLoadDyndeps() = 0;
   virtual void BuildStarted() = 0;
@@ -38,10 +36,10 @@ struct Status {
   virtual void Warning(const char* msg, ...) = 0;
   virtual void Error(const char* msg, ...) = 0;
 
-  virtual ~Status() { }
+  virtual ~Status() {}
 
   /// creates the actual implementation
   static Status* factory(const BuildConfig&);
 };
 
-#endif // NINJA_STATUS_H_
+#endif  // NINJA_STATUS_H_

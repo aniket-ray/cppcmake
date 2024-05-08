@@ -22,8 +22,8 @@
 #include <vector>
 
 #include "depfile_parser.h"
-#include "graph.h"
 #include "exit_status.h"
+#include "graph.h"
 #include "util.h"  // int64_t
 
 struct BuildLog;
@@ -54,10 +54,7 @@ struct Plan {
   /// Dumps the current state of the plan.
   void Dump() const;
 
-  enum EdgeResult {
-    kEdgeFailed,
-    kEdgeSucceeded
-  };
+  enum EdgeResult { kEdgeFailed, kEdgeSucceeded };
 
   /// Mark an edge as done building (whether it succeeded or failed).
   /// If any of the edge's outputs are dyndep bindings of their dependents,
@@ -80,12 +77,10 @@ struct Plan {
 
   /// Update the build plan to account for modifications made to the graph
   /// by information loaded from a dyndep file.
-  bool DyndepsLoaded(DependencyScan* scan, const Node* node,
-                     const DyndepFile& ddf, std::string* err);
+  bool DyndepsLoaded(DependencyScan* scan, const Node* node, const DyndepFile& ddf, std::string* err);
 
   /// Enumerate possible steps we want for an edge.
-  enum Want
-  {
+  enum Want {
     /// We do not want to build the edge, but we might want to build one of
     /// its dependents.
     kWantNothing,
@@ -96,12 +91,11 @@ struct Plan {
     kWantToFinish
   };
 
-private:
+ private:
   void ComputeCriticalPath();
   bool RefreshDyndepDependents(DependencyScan* scan, const Node* node, std::string* err);
   void UnmarkDependents(const Node* node, std::set<Node*>* dependents);
-  bool AddSubTarget(const Node* node, const Node* dependent, std::string* err,
-                    std::set<Edge*>* dyndep_walk);
+  bool AddSubTarget(const Node* node, const Node* dependent, std::string* err, std::set<Edge*>* dyndep_walk);
 
   // Add edges that kWantToStart into the ready queue
   // Must be called after ComputeCriticalPath and before FindWork
@@ -145,35 +139,40 @@ private:
 /// RealCommandRunner is an implementation that actually runs commands.
 struct CommandRunner {
   virtual ~CommandRunner() {}
+
   virtual size_t CanRunMore() const = 0;
   virtual bool StartCommand(Edge* edge) = 0;
 
   /// The result of waiting for a command.
   struct Result {
     Result() : edge(NULL) {}
+
     Edge* edge;
     ExitStatus status;
     std::string output;
+
     bool success() const { return status == ExitSuccess; }
   };
+
   /// Wait for a command to complete, or return false if interrupted.
   virtual bool WaitForCommand(Result* result) = 0;
 
   virtual std::vector<Edge*> GetActiveEdges() { return std::vector<Edge*>(); }
+
   virtual void Abort() {}
 };
 
 /// Options (e.g. verbosity, parallelism) passed to a build.
 struct BuildConfig {
-  BuildConfig() : verbosity(NORMAL), dry_run(false), parallelism(1),
-                  failures_allowed(1), max_load_average(-0.0f) {}
+  BuildConfig() : verbosity(NORMAL), dry_run(false), parallelism(1), failures_allowed(1), max_load_average(-0.0f) {}
 
   enum Verbosity {
-    QUIET,  // No output -- used when testing.
+    QUIET,             // No output -- used when testing.
     NO_STATUS_UPDATE,  // just regular output but suppress status update
-    NORMAL,  // regular output and status update
+    NORMAL,            // regular output and status update
     VERBOSE
   };
+
   Verbosity verbosity;
   bool dry_run;
   int parallelism;
@@ -186,10 +185,8 @@ struct BuildConfig {
 
 /// Builder wraps the build process: starting commands, updating status.
 struct Builder {
-  Builder(State* state, const BuildConfig& config,
-          BuildLog* build_log, DepsLog* deps_log,
-          DiskInterface* disk_interface, Status* status,
-          int64_t start_time_millis);
+  Builder(State* state, const BuildConfig& config, BuildLog* build_log, DepsLog* deps_log,
+          DiskInterface* disk_interface, Status* status, int64_t start_time_millis);
   ~Builder();
 
   /// Clean up after interrupted commands by deleting output files.
@@ -215,9 +212,7 @@ struct Builder {
   bool FinishCommand(CommandRunner::Result* result, std::string* err);
 
   /// Used for tests.
-  void SetBuildLog(BuildLog* log) {
-    scan_.set_build_log(log);
-  }
+  void SetBuildLog(BuildLog* log) { scan_.set_build_log(log); }
 
   /// Load the dyndep information provided by the given node.
   bool LoadDyndeps(Node* node, std::string* err);
@@ -229,8 +224,7 @@ struct Builder {
   Status* status_;
 
  private:
-  bool ExtractDeps(CommandRunner::Result* result, const std::string& deps_type,
-                   const std::string& deps_prefix,
+  bool ExtractDeps(CommandRunner::Result* result, const std::string& deps_type, const std::string& deps_prefix,
                    std::vector<Node*>* deps_nodes, std::string* err);
 
   /// Map of running edge to time the edge started running.
@@ -245,8 +239,8 @@ struct Builder {
   DependencyScan scan_;
 
   // Unimplemented copy ctor and operator= ensure we don't copy the auto_ptr.
-  Builder(const Builder &other);        // DO NOT IMPLEMENT
-  void operator=(const Builder &other); // DO NOT IMPLEMENT
+  Builder(const Builder& other);         // DO NOT IMPLEMENT
+  void operator=(const Builder& other);  // DO NOT IMPLEMENT
 };
 
 #endif  // NINJA_BUILD_H_

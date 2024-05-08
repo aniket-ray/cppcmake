@@ -1,7 +1,7 @@
 // src/main.cpp
-#include "hello.h"
+#include "../include/hello.h"
 
 int main() {
-    say_hello();
-    return 0;
+  say_hello();
+  return 0;
 }

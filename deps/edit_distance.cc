@@ -19,10 +19,7 @@
 
 using namespace std;
 
-int EditDistance(const StringPiece& s1,
-                 const StringPiece& s2,
-                 bool allow_replacements,
-                 int max_edit_distance) {
+int EditDistance(const StringPiece& s1, const StringPiece& s2, bool allow_replacements, int max_edit_distance) {
   // The algorithm implemented below is the "classic"
   // dynamic-programming algorithm for computing the Levenshtein
   // distance, which is described here:
@@ -50,10 +47,8 @@ int EditDistance(const StringPiece& s1,
     for (int x = 1; x <= n; ++x) {
       int old_row = row[x];
       if (allow_replacements) {
-        row[x] = min(previous + (s1.str_[y - 1] == s2.str_[x - 1] ? 0 : 1),
-                     min(row[x - 1], row[x]) + 1);
-      }
-      else {
+        row[x] = min(previous + (s1.str_[y - 1] == s2.str_[x - 1] ? 0 : 1), min(row[x - 1], row[x]) + 1);
+      } else {
         if (s1.str_[y - 1] == s2.str_[x - 1])
           row[x] = previous;
         else

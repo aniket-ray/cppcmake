@@ -29,39 +29,26 @@ struct StringPiece {
 
   /// The constructors intentionally allow for implicit conversions.
   StringPiece(const std::string& str) : str_(str.data()), len_(str.size()) {}
+
   StringPiece(const char* str) : str_(str), len_(strlen(str)) {}
 
   StringPiece(const char* str, size_t len) : str_(str), len_(len) {}
 
-  bool operator==(const StringPiece& other) const {
-    return len_ == other.len_ && memcmp(str_, other.str_, len_) == 0;
-  }
+  bool operator==(const StringPiece& other) const { return len_ == other.len_ && memcmp(str_, other.str_, len_) == 0; }
 
-  bool operator!=(const StringPiece& other) const {
-    return !(*this == other);
-  }
+  bool operator!=(const StringPiece& other) const { return !(*this == other); }
 
   /// Convert the slice into a full-fledged std::string, copying the
   /// data into a new string.
-  std::string AsString() const {
-    return len_ ? std::string(str_, len_) : std::string();
-  }
+  std::string AsString() const { return len_ ? std::string(str_, len_) : std::string(); }
 
-  const_iterator begin() const {
-    return str_;
-  }
+  const_iterator begin() const { return str_; }
 
-  const_iterator end() const {
-    return str_ + len_;
-  }
+  const_iterator end() const { return str_ + len_; }
 
-  char operator[](size_t pos) const {
-    return str_[pos];
-  }
+  char operator[](size_t pos) const { return str_[pos]; }
 
-  size_t size() const {
-    return len_;
-  }
+  size_t size() const { return len_; }
 
   const char* str_;
   size_t len_;

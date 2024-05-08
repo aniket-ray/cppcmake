@@ -27,13 +27,13 @@
 #include <vector>
 
 #if !defined(__has_cpp_attribute)
-#  define __has_cpp_attribute(x)  0
+#define __has_cpp_attribute(x) 0
 #endif
 
 #if __has_cpp_attribute(noreturn)
-#  define NORETURN [[noreturn]]
+#define NORETURN [[noreturn]]
 #else
-#  define NORETURN  // nothing for old compilers
+#define NORETURN  // nothing for old compilers
 #endif
 
 /// Log a fatal message and exit.
@@ -41,11 +41,11 @@ NORETURN void Fatal(const char* msg, ...);
 
 // Have a generic fall-through for different versions of C/C++.
 #if __has_cpp_attribute(fallthrough)
-#  define NINJA_FALLTHROUGH [[fallthrough]]
+#define NINJA_FALLTHROUGH [[fallthrough]]
 #elif defined(__clang__)
-#  define NINJA_FALLTHROUGH [[clang::fallthrough]]
+#define NINJA_FALLTHROUGH [[clang::fallthrough]]
 #else
-#  define NINJA_FALLTHROUGH // nothing
+#define NINJA_FALLTHROUGH  // nothing
 #endif
 
 /// Log a warning message.
@@ -83,8 +83,7 @@ void SetCloseOnExec(int fd);
 
 /// Given a misspelled string and a list of correct spellings, returns
 /// the closest match or NULL if there is no close enough match.
-const char* SpellcheckStringV(const std::string& text,
-                              const std::vector<const char*>& words);
+const char* SpellcheckStringV(const std::string& text, const std::vector<const char*>& words);
 
 /// Like SpellcheckStringV, but takes a NULL-terminated list.
 const char* SpellcheckString(const char* text, ...);

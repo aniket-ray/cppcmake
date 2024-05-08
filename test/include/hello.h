@@ -4,4 +4,4 @@
 
 void say_hello();
 
-#endif // HELLO_H
+#endif  // HELLO_H

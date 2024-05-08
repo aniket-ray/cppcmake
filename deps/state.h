@@ -38,13 +38,15 @@ struct Rule;
 /// the total scheduled weight diminishes enough (i.e. when a scheduled edge
 /// completes).
 struct Pool {
-  Pool(const std::string& name, int depth)
-    : name_(name), current_use_(0), depth_(depth), delayed_() {}
+  Pool(const std::string& name, int depth) : name_(name), current_use_(0), depth_(depth), delayed_() {}
 
   // A depth of 0 is infinite
   bool is_valid() const { return depth_ >= 0; }
+
   int depth() const { return depth_; }
+
   const std::string& name() const { return name_; }
+
   int current_use() const { return current_use_; }
 
   /// true if the Pool might delay this edge
@@ -77,8 +79,10 @@ struct Pool {
 
   struct WeightedEdgeCmp {
     bool operator()(const Edge* a, const Edge* b) const {
-      if (!a) return b;
-      if (!b) return false;
+      if (!a)
+        return b;
+      if (!b)
+        return false;
       int weight_diff = a->weight() - b->weight();
       if (weight_diff != 0) {
         return weight_diff < 0;

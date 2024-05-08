@@ -26,6 +26,7 @@ struct Rule;
 /// An interface for a scope for variable (e.g. "$foo") lookups.
 struct Env {
   virtual ~Env() {}
+
   virtual std::string LookupVariable(const std::string& var) = 0;
 };
 
@@ -40,6 +41,7 @@ struct EvalString {
   std::string Unparse() const;
 
   void Clear() { parsed_.clear(); }
+
   bool empty() const { return parsed_.empty(); }
 
   void AddText(StringPiece text);
@@ -49,8 +51,9 @@ struct EvalString {
   /// for use in tests.
   std::string Serialize() const;
 
-private:
+ private:
   enum TokenType { RAW, SPECIAL };
+
   typedef std::vector<std::pair<std::string, TokenType> > TokenList;
   TokenList parsed_;
 };
@@ -80,9 +83,11 @@ struct Rule {
 /// as well as a pointer to a parent scope.
 struct BindingEnv : public Env {
   BindingEnv() : parent_(NULL) {}
+
   explicit BindingEnv(BindingEnv* parent) : parent_(parent) {}
 
   virtual ~BindingEnv() {}
+
   virtual std::string LookupVariable(const std::string& var);
 
   void AddRule(const Rule* rule);
@@ -97,10 +102,9 @@ struct BindingEnv : public Env {
   /// 2) value set on rule, with expansion in the edge's scope
   /// 3) value set on enclosing scope of edge (edge_->env_->parent_)
   /// This function takes as parameters the necessary info to do (2).
-  std::string LookupWithFallback(const std::string& var, const EvalString* eval,
-                                 Env* env);
+  std::string LookupWithFallback(const std::string& var, const EvalString* eval, Env* env);
 
-private:
+ private:
   std::map<std::string, std::string> bindings_;
   std::map<std::string, const Rule*> rules_;
   BindingEnv* parent_;

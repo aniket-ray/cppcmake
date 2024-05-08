@@ -19,10 +19,7 @@
 
 using namespace std;
 
-DepfileParser::DepfileParser(DepfileParserOptions options)
-  : options_(options)
-{
-}
+DepfileParser::DepfileParser(DepfileParserOptions options) : options_(options) {}
 
 // A note on backslashes in Makefiles, from reading the docs:
 // Backslash-newline is the line continuation character.
