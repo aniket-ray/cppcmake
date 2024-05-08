@@ -3,7 +3,7 @@ version: 2.1
 jobs:
   install:
     docker:
-      - image: ubuntu:20.04
+      - image: ubuntu:latest
     steps:
       - checkout
       - run:
@@ -23,7 +23,7 @@ jobs:
 
   format_tidy:
     docker:
-      - image: ubuntu:20.04
+      - image: ubuntu:latest
     steps:
       - checkout
       - run:
