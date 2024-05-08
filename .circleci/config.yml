@@ -9,6 +9,7 @@ jobs:
           name: Install dependencies
           command: |
             apt-get update
+            timedatectl set-timezone America/New_York
             apt-get install -y clang-14
             apt-get install -y cmake
             apt-get install -y clang-tidy 
