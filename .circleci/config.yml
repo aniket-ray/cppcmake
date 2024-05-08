@@ -20,6 +20,7 @@ jobs:
             apt-get install -y cmake
             apt-get install -y clang-tidy
             apt-get install -y clang-format
+            apt-get install -y git
       - run:
           name: Run Clang-Format
           command: |
