@@ -10,7 +10,6 @@ jobs:
           name: Install dependencies
           command: |
             echo "America/New_York" > /etc/timezone
-            sudo ln -snf /usr/share/zoneinfo/America/New_York /etc/localtime
             ln -snf /usr/share/zoneinfo/America/New_York /etc/localtime
             apt-get update
             DEBIAN_FRONTEND=noninteractive apt-get install -y tzdata
