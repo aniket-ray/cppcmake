@@ -7,15 +7,24 @@ jobs:
     steps:
       - checkout
       - run:
-          name: Install dependencies
+          name: Setup timezone and update packages
           command: |
             echo "America/New_York" > /etc/timezone
             ln -snf /usr/share/zoneinfo/America/New_York /etc/localtime
             apt-get update
             DEBIAN_FRONTEND=noninteractive apt-get install -y tzdata
+      - run:
+          name: Add LLVM repository
+          command: |
+            wget -O - https://apt.llvm.org/llvm-snapshot.gpg.key|sudo apt-key add -
+            echo "deb http://apt.llvm.org/focal/ llvm-toolchain-focal-14 main" | sudo tee /etc/apt/sources.list.d/llvm.list
+            apt-get update
+      - run:
+          name: Install Clang and other tools
+          command: |
             apt-get install -y clang-14
             apt-get install -y cmake
-            apt-get install -y clang-tidy 
+            apt-get install -y clang-tidy
             apt-get install -y clang-format
 
   format_tidy:
@@ -41,4 +50,3 @@ workflows:
       - format_tidy:
           requires:
             - install
-
