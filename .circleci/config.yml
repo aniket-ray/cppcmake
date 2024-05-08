@@ -11,6 +11,8 @@ jobs:
             apt-get update
             apt-get install -y clang-14
             apt-get install -y cmake
+            apt-get install -y clang-tidy 
+            apt-get install -y clang-format
 
   format_tidy:
     docker:
