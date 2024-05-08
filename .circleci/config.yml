@@ -1,7 +1,7 @@
 version: 2.1
 
 jobs:
-  install:
+  install_format_tidy:
     docker:
       - image: ubuntu:latest
     steps:
@@ -20,12 +20,6 @@ jobs:
             apt-get install -y cmake
             apt-get install -y clang-tidy
             apt-get install -y clang-format
-
-  format_tidy:
-    docker:
-      - image: ubuntu:latest
-    steps:
-      - checkout
       - run:
           name: Run Clang-Format
           command: |
@@ -36,11 +30,10 @@ jobs:
           command: |
             find ./src -iname "*.cpp" | xargs clang-tidy -p .
 
+
 workflows:
   version: 2
   build_and_test:
     jobs:
-      - install
-      - format_tidy:
-          requires:
-            - install
+      - install_format_tidy
+
