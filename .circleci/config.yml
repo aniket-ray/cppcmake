@@ -1,0 +1,40 @@
+version: 2.1
+
+jobs:
+  install_format_tidy:
+    docker:
+      - image: ubuntu:latest
+    steps:
+      - checkout
+      - run:
+          name: Setup timezone and update packages
+          command: |
+            echo "America/New_York" > /etc/timezone
+            ln -snf /usr/share/zoneinfo/America/New_York /etc/localtime
+            apt-get update
+            DEBIAN_FRONTEND=noninteractive apt-get install -y tzdata
+      - run:
+          name: Install Clang and other tools
+          command: |
+            apt-get install -y clang-14
+            apt-get install -y cmake
+            apt-get install -y clang-tidy
+            apt-get install -y clang-format
+            apt-get install -y git
+      - run:
+          name: Run Clang-Format
+          command: |
+            find ./src -iname "*.cpp" -o -iname "*.h" | xargs clang-format -i
+            git diff --exit-code
+      - run:
+          name: Run Clang-Tidy
+          command: |
+            find ./src -iname "*.cpp" | xargs clang-tidy -p .
+
+
+workflows:
+  version: 2
+  build_and_test:
+    jobs:
+      - install_format_tidy
+
