@@ -11,7 +11,7 @@ jobs:
           command: |
             echo "America/New_York" > /etc/timezone
             sudo ln -snf /usr/share/zoneinfo/America/New_York /etc/localtime
-             sudo DEBIAN_FRONTEND=noninteractive apt-get install -y tzdata
+            DEBIAN_FRONTEND=noninteractive apt-get install -y tzdata
             apt-get update
             apt-get install -y clang-14
             apt-get install -y cmake
