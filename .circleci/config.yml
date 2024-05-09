@@ -3,7 +3,7 @@ version: 2.1
 jobs:
   install_format_tidy:
     docker:
-      - image: ubuntu:latest
+      - image: ubuntu:22.04
     steps:
       - checkout
       - run:
