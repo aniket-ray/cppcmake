@@ -1,0 +1,6 @@
+Checks: '*, -llvm-header-guard, -google-runtime-references'
+CheckOptions:
+  - key: readability-braces-around-statements.ShortStatementLines
+    value: '1'
+  - key: modernize-use-auto.MinTypeNameLength
+    value: '3'
