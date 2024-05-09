@@ -241,7 +241,7 @@ Lexer::Token Lexer::ReadToken() {
       }
     yy4:
       ++p;
-    yy5: {
+    yy5 : {
       token = ERROR;
       break;
     }
@@ -271,7 +271,7 @@ Lexer::Token Lexer::ReadToken() {
         if (yych == '#')
           goto yy32;
       }
-    yy11: {
+    yy11 : {
       token = INDENT;
       break;
     }
@@ -599,7 +599,7 @@ void Lexer::EatWhitespace() {
       { break; }
     yy79:
       ++p;
-    yy80: { break; }
+    yy80 : { break; }
     yy81:
       yych = *++p;
       if (yybm[0 + yych] & 128) {
@@ -794,7 +794,7 @@ bool Lexer::ReadEvalString(EvalString* eval, bool path, string* err) {
       }
     yy112:
       ++p;
-    yy113: {
+    yy113 : {
       last_token_ = start;
       return Error("bad $-escape (literal $ must be written as $$)", err);
     }

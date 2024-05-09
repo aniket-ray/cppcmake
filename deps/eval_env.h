@@ -54,7 +54,7 @@ struct EvalString {
  private:
   enum TokenType { RAW, SPECIAL };
 
-  typedef std::vector<std::pair<std::string, TokenType> > TokenList;
+  typedef std::vector<std::pair<std::string, TokenType>> TokenList;
   TokenList parsed_;
 };
 
