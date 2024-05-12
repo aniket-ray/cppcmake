@@ -43,7 +43,6 @@ class TestMake {
   }
 };
 
-
 int main() {
   TestMake::testSetVar();
   TestMake::testAddRule();
