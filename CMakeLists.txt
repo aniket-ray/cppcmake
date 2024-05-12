@@ -265,3 +265,12 @@ endif ()
 if (CPPCMAKE_BUILD_BINARY)
     install(TARGETS cppcmake)
 endif ()
+git c
+
+add_executable(cppcmake_unit_test unit_tests/test_make.cpp
+        src/cppcmake_utils.cpp
+        src/cppcmake_utils.hpp
+        src/cppcmake_backend.cpp
+        src/cppcmake_backend.hpp)
+target_link_libraries(cppcmake_unit_test PRIVATE libninja libninja-re2c)
+

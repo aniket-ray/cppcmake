@@ -101,9 +101,7 @@ struct SubprocessSet {
   /// 0 if not interruption.
   static int interrupted_;
 
-  static bool IsInterrupted() {
-    return interrupted_ != 0;
-  }
+  static bool IsInterrupted() { return interrupted_ != 0; }
 
   struct sigaction old_int_act_;
   struct sigaction old_term_act_;

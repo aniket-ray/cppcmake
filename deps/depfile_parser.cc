@@ -113,7 +113,7 @@ bool DepfileParser::Parse(string* content, string* err) {
         { break; }
       yy4:
         ++in;
-      yy5 : {
+      yy5: {
         // For any other character (e.g. whitespace), swallow it here,
         // allowing the outer logic to loop around again.
         break;
@@ -135,7 +135,7 @@ bool DepfileParser::Parse(string* content, string* err) {
         if (yybm[0 + yych] & 128) {
           goto yy9;
         }
-      yy11 : {
+      yy11: {
         // Got a span of plain text.
         int len = (int)(in - start);
         // Need to shift it over if we're overwriting backslashes.
@@ -238,7 +238,7 @@ bool DepfileParser::Parse(string* content, string* err) {
           if (yych == ' ')
             goto yy28;
         }
-      yy26 : {
+      yy26: {
         // De-escape colon sign, but preserve other leading backslashes.
         // Regular expression uses lookahead to make sure that no whitespace
         // nor EOF follows. In that case it'd be the : at the end of a target
