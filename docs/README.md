@@ -73,6 +73,24 @@ These instructions should help you get the CPPCMake project up and running on yo
     ```bash
     ctest
     ```
+   
+## Testing application (Manually and Automated)
+1. **Running through CI/CD**:
+   - The config file of the CircleCI has the configuration for building and running the tests inside ```unit_tests ```, which is configured to run on every push to VCS.
+    ```bash
+    ./cppcmake
+   ```
+
+2. **Manually running test cases**:
+   - The test cases can be run manually by running the following commands in the root directory.
+   ```bash
+   mkdir build
+   cd build
+   cmake .. 
+   cmake --build . --target cppcmake_unit_test
+   ./cppcmake_unit_test
+   ```
+
 
 ## Contribution Guidelines
 1. **Fork the repository**: Click the "Fork" button on the GitHub repository page.
