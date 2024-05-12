@@ -1,5 +1,10 @@
 # CPPCMake Project
 
+## Build Status
+
+[![CircleCI](https://dl.circleci.com/status-badge/img/circleci/Q56s8BE66su9h4vxAu8yef/PR9wncbupGm77QG4b7SuYV/tree/main.svg?style=svg)](https://dl.circleci.com/status-badge/redirect/circleci/Q56s8BE66su9h4vxAu8yef/PR9wncbupGm77QG4b7SuYV/tree/main)
+
+
 ## Project's Purpose
 The CPPCMake project aims to provide a modern C++ build system using CMake, integrating tools for code formatting, linting, and automated testing. It leverages CircleCI for continuous integration and delivery, ensuring code quality and build reliability.
 
