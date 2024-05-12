@@ -23,6 +23,14 @@ jobs:
             apt-get install -y clang-format
             apt-get install -y git
       - run:
+          name: Building Unit test
+          command: |
+            mkdir build
+            cd build
+            cmake .. -DCMAKE_CXX_COMPILER=/usr/bin/clang++
+            cmake --build . --target cppcmake_unit_test
+            ./cppcmake_unit_test
+      - run:
           name: Run Clang-Format
           command: |
             find . -iname "*.cpp" -o -iname "*.cc" -o -iname "*.h" | xargs clang-format -i
@@ -31,15 +39,7 @@ jobs:
           name: Run Clang-Tidy
           command: |
             find ./src -iname "*.cpp" -o -iname "*.cc" -o -iname "*.h" | xargs clang-tidy -p .
-      - run:
-          name: Building Unit test
-          command: |
-            mkdir build
-            cd build
-            export CXX=/usr/bin/clang-14
-            cmake ..
-            cmake --build . --target cppcmake_unit_test
-            ./cppcmake_unit_test
+
 
 
 workflows:
