@@ -13,6 +13,7 @@ jobs:
             ln -snf /usr/share/zoneinfo/America/New_York /etc/localtime
             apt-get update
             DEBIAN_FRONTEND=noninteractive apt-get install -y tzdata
+
       - run:
           name: Install Clang and other tools
           command: |
@@ -35,7 +36,7 @@ jobs:
           command: |
             mkdir build
             cd build
-            cmake ..
+            cmake .. -DCMAKE_CXX_COMPILER=clang++
             cmake --build . --target cppcmake_unit_test
             ./cppcmake_unit_test
 
