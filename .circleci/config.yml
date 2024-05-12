@@ -14,13 +14,24 @@ jobs:
             apt-get update
             DEBIAN_FRONTEND=noninteractive apt-get install -y tzdata
       - run:
-          name: Install Clang and other tools
+          name: Install Clang tools and create symlinks
           command: |
-            apt-get install -y clang-14
-            apt-get install -y cmake
-            apt-get install -y clang-tidy
-            apt-get install -y clang-format
-            apt-get install -y git
+            apt-get update
+            apt-get install -y clang-14 clang-format-14 clang-tidy-14
+            update-alternatives --install /usr/bin/clang++ clang++ /usr/bin/clang++-14 100
+            update-alternatives --install /usr/bin/clang clang /usr/bin/clang-14 100
+            update-alternatives --install /usr/bin/clang-format clang-format /usr/bin/clang-format-14 100
+            update-alternatives --install /usr/bin/clang-tidy clang-tidy /usr/bin/clang-tidy-14 100
+      - run:
+          name: Verify Clang tools installation
+          command: |
+            clang++ --version
+            clang --version
+            clang-format --version
+            clang-tidy --version
+      - run:
+          name: install cmake and git
+          command: apt-get install -y cmake git
       - run:
           name: Run Clang-Format
           command: |
@@ -30,6 +41,15 @@ jobs:
           name: Run Clang-Tidy
           command: |
             find ./src -iname "*.cpp" -o -iname "*.cc" -o -iname "*.h" | xargs clang-tidy -p .
+      - run:
+          name: Building Unit test
+          command: |
+            mkdir build
+            cd build
+            cmake .. -DCMAKE_CXX_COMPILER=$(which clang++-14)
+            cmake --build . --target cppcmake_unit_test
+            ./cppcmake_unit_test
+
 
 
 workflows:

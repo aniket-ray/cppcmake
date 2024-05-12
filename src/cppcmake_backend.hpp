@@ -31,6 +31,10 @@ namespace CppCmake {
 
         void addBuildTarget(CppCmake::BuildTarget &&build);
 
+        std::string getVar(const std::string& key);
+        Rule getRule(const std::string& name);
+        BuildTarget getBuildTarget(const std::string& src);
+        std::string getDefault();
 
         NORETURN void build(int argc, char **argv);
 

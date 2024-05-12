@@ -1,5 +1,33 @@
 #include "cppcmake_backend.hpp"
 
+std::string CppCmake::Make::getVar(const std::string& key) {
+  auto it = std::find_if(mappings_.begin(), mappings_.end(),
+                         [&key](const std::pair<std::string, std::string>& p) { return p.first == key; });
+  return it != mappings_.end() ? it->second : "";
+}
+
+CppCmake::Rule CppCmake::Make::getRule(const std::string& name) {
+  auto it = std::find_if(rules_.begin(), rules_.end(), [&name](const Rule& r) { return r.name == name; });
+  if (it != rules_.end()) {
+    return *it;
+  } else {
+    return Rule{};  // Return an empty Rule if not found
+  }
+}
+
+CppCmake::BuildTarget CppCmake::Make::getBuildTarget(const std::string& src) {
+  auto it = std::find_if(builds_.begin(), builds_.end(), [&src](const BuildTarget& b) { return b.src == src; });
+  if (it != builds_.end()) {
+    return *it;
+  } else {
+    return BuildTarget{};  // Return an empty BuildTarget if not found
+  }
+}
+
+std::string CppCmake::Make::getDefault() {
+  return default_;
+}
+
 void CppCmake::Make::setVar(std::string&& key, std::string&& val) {
   mappings_.emplace_back(key, val);
 }
