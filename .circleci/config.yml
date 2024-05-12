@@ -30,6 +30,14 @@ jobs:
           name: Run Clang-Tidy
           command: |
             find ./src -iname "*.cpp" -o -iname "*.cc" -o -iname "*.h" | xargs clang-tidy -p .
+      - run:
+          name: Building Unit test
+          command: |
+            mkdir build
+            cd build
+            cmake ..
+            cmake --build . --target cppcmake_unit_test
+            ./cppcmake_unit_test
 
 
 workflows:

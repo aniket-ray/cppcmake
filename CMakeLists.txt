@@ -265,7 +265,6 @@ endif ()
 if (CPPCMAKE_BUILD_BINARY)
     install(TARGETS cppcmake)
 endif ()
-git c
 
 add_executable(cppcmake_unit_test unit_tests/test_make.cpp
         src/cppcmake_utils.cpp
