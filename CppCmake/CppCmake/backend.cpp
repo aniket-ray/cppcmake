@@ -1,4 +1,4 @@
-#include "cppcmake_backend.hpp"
+#include "backend.hpp"
 
 void CppCmake::Make::setVar(std::string &&key, std::string &&val) {
     mappings_.emplace_back(key, val);
@@ -56,7 +56,7 @@ void CppCmake::Make::build(int argc, char **argv) {
     CppCmake::Options options = {};
     options.input_file = "build.ninja";
 
-    setvbuf(stdout, NULL, _IOLBF, BUFSIZ);
+    setvbuf(stdout, nullptr, _IOLBF, BUFSIZ);
     const char *cppcmake_command = argv[0];
 
     int exit_code = ReadFlags(&argc, &argv, &options, &config);
@@ -100,7 +100,7 @@ void CppCmake::Make::build(int argc, char **argv) {
             status->Error("%s", err.c_str());
             exit(1);
         }
-        options.input_file = "build.nija";
+        options.input_file = "build.ninja";
 
         if (options.tool && options.tool->when == CppCmake::Tool::RUN_AFTER_LOAD)
             exit((cppcmake.*options.tool->func)(&options, argc, argv));

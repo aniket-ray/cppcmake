@@ -67,12 +67,12 @@ if (${RE2C_MAJOR_VERSION} GREATER 1)
                 COMMAND ${RE2C} -b -i --no-generation-date --no-version -o ${OUT} ${IN}
         )
     endfunction()
-    re2c(deps/depfile_parser.in.cc ${PROJECT_BINARY_DIR}/depfile_parser.cc)
-    re2c(deps/lexer.in.cc ${PROJECT_BINARY_DIR}/lexer.cc)
+    re2c(CppCmake/CppCmake/depfile_parser.in.cc ${PROJECT_BINARY_DIR}/depfile_parser.cc)
+    re2c(CppCmake/CppCmake/lexer.in.cc ${PROJECT_BINARY_DIR}/lexer.cc)
     add_library(libninja-re2c OBJECT ${PROJECT_BINARY_DIR}/depfile_parser.cc ${PROJECT_BINARY_DIR}/lexer.cc)
 else ()
     message(WARNING "re2c 2 or later was not found; changes to deps/*.in.cc will not affect your build.")
-    add_library(libninja-re2c OBJECT deps/depfile_parser.cc deps/lexer.cc)
+    add_library(libninja-re2c OBJECT CppCmake/CppCmake/depfile_parser.cc CppCmake/CppCmake/lexer.cc)
 endif ()
 target_include_directories(libninja-re2c PRIVATE deps)
 
@@ -117,39 +117,39 @@ check_platform_supports_browse_mode(platform_supports_ninja_browse)
 
 # Core source files all build into ninja library.
 add_library(libninja OBJECT
-        deps/build_log.cc
-        deps/build.cc
-        deps/clean.cc
-        deps/clparser.cc
-        deps/dyndep.cc
-        deps/dyndep_parser.cc
-        deps/debug_flags.cc
-        deps/deps_log.cc
-        deps/disk_interface.cc
-        deps/edit_distance.cc
-        deps/eval_env.cc
-        deps/graph.cc
-        deps/graphviz.cc
-        deps/json.cc
-        deps/line_printer.cc
-        deps/manifest_parser.cc
-        deps/metrics.cc
-        deps/missing_deps.cc
-        deps/parser.cc
-        deps/state.cc
-        deps/status_printer.cc
-        deps/string_piece_util.cc
-        deps/util.cc
-        deps/version.cc
+        CppCmake/CppCmake/build_log.cc
+        CppCmake/CppCmake/build.cc
+        CppCmake/CppCmake/clean.cc
+        CppCmake/CppCmake/clparser.cc
+        CppCmake/CppCmake/dyndep.cc
+        CppCmake/CppCmake/dyndep_parser.cc
+        CppCmake/CppCmake/debug_flags.cc
+        CppCmake/CppCmake/deps_log.cc
+        CppCmake/CppCmake/disk_interface.cc
+        CppCmake/CppCmake/edit_distance.cc
+        CppCmake/CppCmake/eval_env.cc
+        CppCmake/CppCmake/graph.cc
+        CppCmake/CppCmake/graphviz.cc
+        CppCmake/CppCmake/json.cc
+        CppCmake/CppCmake/line_printer.cc
+        CppCmake/CppCmake/manifest_parser.cc
+        CppCmake/CppCmake/metrics.cc
+        CppCmake/CppCmake/missing_deps.cc
+        CppCmake/CppCmake/parser.cc
+        CppCmake/CppCmake/state.cc
+        CppCmake/CppCmake/status_printer.cc
+        CppCmake/CppCmake/string_piece_util.cc
+        CppCmake/CppCmake/util.cc
+        CppCmake/CppCmake/version.cc
 )
 
-target_sources(libninja PRIVATE deps/subprocess-posix.cc)
+target_sources(libninja PRIVATE CppCmake/CppCmake/subprocess-posix.cc)
 if (CMAKE_SYSTEM_NAME STREQUAL "OS400" OR CMAKE_SYSTEM_NAME STREQUAL "AIX")
-    target_sources(libninja PRIVATE deps/getopt.c)
+    target_sources(libninja PRIVATE CppCmake/CppCmake/getopt.c)
     # Build getopt.c, which can be compiled as either C or C++, as C++
     # so that build environments which lack a C compiler, but have a C++
     # compiler may build ninja.
-    set_source_files_properties(deps/getopt.c PROPERTIES LANGUAGE CXX)
+    set_source_files_properties(CppCmake/CppCmake/getopt.c PROPERTIES LANGUAGE CXX)
 endif ()
 
 # Needed for perfstat_cpu_total
@@ -169,11 +169,13 @@ endif ()
 
 # Main executable is library plus main() function.
 if (CPPCMAKE_BUILD_BINARY)
-    add_executable(cppcmake src/cppcmake.cc
-            src/cppcmake_utils.cpp
-            src/cppcmake_utils.hpp
-            src/cppcmake_backend.cpp
-            src/cppcmake_backend.hpp)
+    add_executable(cppcmake standalone/cppcmake.cc
+            CppCmake/CppCmake/util_funcs.cpp
+            CppCmake/CppCmake/util_funcs.hpp
+            CppCmake/CppCmake/backend.cpp
+            CppCmake/CppCmake/backend.hpp
+            CppCmake/CppCmake/graph_generator.cpp
+            CppCmake/CppCmake/graph_generator.hpp)
     target_link_libraries(cppcmake PRIVATE libninja libninja-re2c)
 endif ()
 
@@ -183,11 +185,11 @@ if (platform_supports_ninja_browse)
     # by deps/browse.cc
     add_custom_command(
             OUTPUT build/browse_py.h
-            MAIN_DEPENDENCY deps/browse.py
-            DEPENDS deps/inline.sh
+            MAIN_DEPENDENCY CppCmake/CppCmake/browse.py
+            DEPENDS CppCmake/CppCmake/inline.sh
             COMMAND ${CMAKE_COMMAND} -E make_directory ${PROJECT_BINARY_DIR}/build
-            COMMAND deps/inline.sh kBrowsePy
-            < deps/browse.py
+            COMMAND CppCmake/CppCmake/inline.sh kBrowsePy
+            < CppCmake/CppCmake/browse.py
             > ${PROJECT_BINARY_DIR}/build/browse_py.h
             WORKING_DIRECTORY .
             VERBATIM
@@ -195,9 +197,9 @@ if (platform_supports_ninja_browse)
 
     if (CPPCMAKE_BUILD_BINARY)
         target_compile_definitions(cppcmake PRIVATE NINJA_HAVE_BROWSE)
-        target_sources(cppcmake PRIVATE deps/browse.cc)
+        target_sources(cppcmake PRIVATE CppCmake/CppCmake/browse.cc)
     endif ()
-    set_source_files_properties(deps/browse.cc
+    set_source_files_properties(CppCmake/CppCmake/browse.cc
             PROPERTIES
             OBJECT_DEPENDS "${PROJECT_BINARY_DIR}/build/browse_py.h"
             INCLUDE_DIRECTORIES "${PROJECT_BINARY_DIR}"
@@ -226,26 +228,26 @@ if (BUILD_TESTING)
 
     # Tests all build into cppcmake_test executable.
     add_executable(cppcmake_test
-            deps/build_log_test.cc
-            deps/build_test.cc
-            deps/clean_test.cc
-            deps/clparser_test.cc
-            deps/depfile_parser_test.cc
-            deps/deps_log_test.cc
-            deps/disk_interface_test.cc
-            deps/dyndep_parser_test.cc
-            deps/edit_distance_test.cc
-            deps/graph_test.cc
-            deps/json_test.cc
-            deps/lexer_test.cc
-            deps/manifest_parser_test.cc
-            deps/missing_deps_test.cc
-            deps/cppcmake_test.cc
-            deps/state_test.cc
-            deps/string_piece_util_test.cc
-            deps/subprocess_test.cc
-            deps/test.cc
-            deps/util_test.cc
+            CppCmake/CppCmake/build_log_test.cc
+            CppCmake/CppCmake/build_test.cc
+            CppCmake/CppCmake/clean_test.cc
+            CppCmake/CppCmake/clparser_test.cc
+            CppCmake/CppCmake/depfile_parser_test.cc
+            CppCmake/CppCmake/deps_log_test.cc
+            CppCmake/CppCmake/disk_interface_test.cc
+            CppCmake/CppCmake/dyndep_parser_test.cc
+            CppCmake/CppCmake/edit_distance_test.cc
+            CppCmake/CppCmake/graph_test.cc
+            CppCmake/CppCmake/json_test.cc
+            CppCmake/CppCmake/lexer_test.cc
+            CppCmake/CppCmake/manifest_parser_test.cc
+            CppCmake/CppCmake/missing_deps_test.cc
+            CppCmake/CppCmake/cppcmake_test.cc
+            CppCmake/CppCmake/state_test.cc
+            CppCmake/CppCmake/string_piece_util_test.cc
+            CppCmake/CppCmake/subprocess_test.cc
+            CppCmake/CppCmake/test.cc
+            CppCmake/CppCmake/util_test.cc
     )
 
     find_package(Threads REQUIRED)

@@ -1,10 +1,10 @@
-#ifndef CPPCMAKE_CPPCMAKE_BACKEND_HPP
-#define CPPCMAKE_CPPCMAKE_BACKEND_HPP
+#ifndef CPPCMAKE_BACKEND_HPP
+#define CPPCMAKE_BACKEND_HPP
 
 #include <string>
 #include <vector>
 
-#include "cppcmake_utils.hpp"
+#include "util_funcs.hpp"
 
 namespace CppCmake {
 
@@ -52,4 +52,4 @@ namespace CppCmake {
 
 };
 
-#endif //CPPCMAKE_CPPCMAKE_BACKEND_HPP
+#endif  //CPPCMAKE_BACKEND_HPP

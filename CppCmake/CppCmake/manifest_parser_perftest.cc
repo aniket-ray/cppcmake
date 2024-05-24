@@ -29,8 +29,8 @@
 #include "getopt.h"
 #include <unistd.h>
 #else
-#include <getopt.h>
 #include <unistd.h>
+#include "getopt.h"
 #endif
 
 #include "disk_interface.h"

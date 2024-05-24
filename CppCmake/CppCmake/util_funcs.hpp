@@ -1,5 +1,5 @@
-#ifndef CPPCMAKE_CPPCMAKE_UTILS_HPP
-#define CPPCMAKE_CPPCMAKE_UTILS_HPP
+#ifndef CPPCMAKE_UTIL_FUNCS_HPP
+#define CPPCMAKE_UTIL_FUNCS_HPP
 
 #include <cerrno>
 #include <climits>
@@ -12,21 +12,20 @@
 #include <getopt.h>
 #include <unistd.h>
 
-
-#include "../deps/build.h"
-#include "../deps/build_log.h"
-#include "../deps/deps_log.h"
-#include "../deps/clean.h"
-#include "../deps/debug_flags.h"
-#include "../deps/disk_interface.h"
-#include "../deps/graphviz.h"
-#include "../deps/json.h"
-#include "../deps/manifest_parser.h"
-#include "../deps/metrics.h"
-#include "../deps/missing_deps.h"
-#include "../deps/state.h"
-#include "../deps/status.h"
-#include "../deps/version.h"
+#include "build.h"
+#include "build_log.h"
+#include "clean.h"
+#include "debug_flags.h"
+#include "deps_log.h"
+#include "disk_interface.h"
+#include "graphviz.h"
+#include "json.h"
+#include "manifest_parser.h"
+#include "metrics.h"
+#include "missing_deps.h"
+#include "state.h"
+#include "status.h"
+#include "version.h"
 
 namespace CppCmake {
     enum PrintCommandMode {
@@ -141,7 +140,7 @@ namespace CppCmake {
         int RunBuild(int argc, char **argv, Status *status);
 
         /// Dump the output requested by '-d stats'.
-        void DumpMetrics();
+        void DumpMetrics() const;
 
         virtual bool IsPathDead(StringPiece s) const {
             Node *n = state_.LookupNode(s);
@@ -239,4 +238,4 @@ namespace CppCmake {
 //    NORETURN void real_main(int argc, char **argv);
 };
 
-#endif //CPPCMAKE_CPPCMAKE_UTILS_HPP
+#endif  //CPPCMAKE_UTIL_FUNCS_HPP

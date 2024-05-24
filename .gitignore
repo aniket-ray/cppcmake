@@ -2,6 +2,8 @@ build/
 cmake-build-debug/
 cmake-build-debug-event-trace/
 
+**/.DS_Store
+
 # Prerequisites
 *.d
 

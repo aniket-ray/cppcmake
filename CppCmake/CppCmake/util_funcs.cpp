@@ -1,5 +1,4 @@
-#include "cppcmake_utils.hpp"
-
+#include "util_funcs.hpp"
 
 /// Print usage information.
 void CppCmake::Usage(const BuildConfig &config) {
@@ -1091,7 +1090,7 @@ bool CppCmake::CppCmakeMain::OpenDepsLog(bool recompact_only) {
     return true;
 }
 
-void CppCmake::CppCmakeMain::DumpMetrics() {
+void CppCmake::CppCmakeMain::DumpMetrics() const {
     g_metrics->Report();
 
     printf("\n");
