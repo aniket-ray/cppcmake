@@ -8,6 +8,7 @@
 #include <cstring>
 
 #include <algorithm>
+#include <sstream>
 
 #include <getopt.h>
 #include <unistd.h>
@@ -235,7 +236,9 @@ namespace CppCmake {
 
     int ReadFlags(int *argc, char ***argv, Options *options, BuildConfig *config);
 
-//    NORETURN void real_main(int argc, char **argv);
+    bool tokenizer(const std::string& string_, EvalString* let_value, std::string* err);
+
+    std::string extract_references(const std::string& ref);
 };
 
 #endif  //CPPCMAKE_UTIL_FUNCS_HPP

@@ -19,8 +19,6 @@ void CppCmake::Make::addBuildTarget(BuildTarget &&build) {
 
 std::string CppCmake::Make::generate_string_() {
     std::string out;
-    out += "cxx = " + this->cxx_ + "\n";
-    out += "cflags = " + this->cflags_ + "\n\n";
 
     for(const auto& m : mappings_) {
         out += m.first + " = " + m.second + "\n";
