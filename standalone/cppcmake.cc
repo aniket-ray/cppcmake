@@ -1,6 +1,6 @@
 #include "../CppCmake/CppCmake/backend.hpp"
 
-int main(int argc, char** argv) {
+int  main(int argc, char** argv) {
   //    CppCmake::real_main(argc, argv);
   CppCmake::Make make;
 
