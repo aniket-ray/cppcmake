@@ -1,10 +1,6 @@
 #include <numeric>
 #include "../CppCmake/CppCmake/backend.hpp"
 
-<<<<<<< Updated upstream
-int  main(int argc, char** argv) {
-  //    CppCmake::real_main(argc, argv);
-=======
 #include <format>
 
 struct Populator {
@@ -96,7 +92,6 @@ bool Populator::addRule(Populator::EnvRule&& env_rule) {
 }
 
 int main(int argc, char** argv) {
->>>>>>> Stashed changes
   CppCmake::Make make;
 
   BuildConfig config;
