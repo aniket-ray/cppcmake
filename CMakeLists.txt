@@ -1,5 +1,7 @@
 cmake_minimum_required(VERSION 3.15)
 
+set (CMAKE_CXX_STANDARD 20)
+
 include(CheckSymbolExists)
 include(CheckIPOSupported)
 
@@ -174,8 +176,9 @@ if (CPPCMAKE_BUILD_BINARY)
             CppCmake/CppCmake/util_funcs.hpp
             CppCmake/CppCmake/backend.cpp
             CppCmake/CppCmake/backend.hpp
-            CppCmake/CppCmake/graph_generator.cpp
-            CppCmake/CppCmake/graph_generator.hpp)
+            CppCmake/upgrade/eval_string_factory.cc
+            CppCmake/upgrade/eval_string_factory.h
+    )
     target_link_libraries(cppcmake PRIVATE libninja libninja-re2c)
 endif ()
 
@@ -260,7 +263,7 @@ if (BUILD_TESTING)
         target_link_options(manifest_parser_perftest PRIVATE "-Wl,-bmaxdata:0x80000000")
     endif ()
 
-    add_test(NAME NinjaTest COMMAND cppcmake_test)
+    add_test(NAME CppCmakeTest COMMAND cppcmake_test)
 endif ()
 
 if (CPPCMAKE_BUILD_BINARY)

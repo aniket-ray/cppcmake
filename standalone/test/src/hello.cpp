@@ -1,5 +1,5 @@
 // src/hello.cpp
-#include "hello.h"
+#include "../include/hello.h"
 #include <iostream>
 
 void say_hello() {

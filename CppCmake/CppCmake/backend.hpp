@@ -6,12 +6,31 @@
 
 #include "util_funcs.hpp"
 
+/*
+ *
+command = g++ -Itest/include -c $in -o $out
+depfile = $out.d
+deps = gcc
+msvc_deps_prefix = Note:
+description = Compiling $in to $out
+generator = true
+restat = true
+rspfile = $out.rsp
+rspfile_content = --input $in --output $out
+ */
 namespace CppCmake {
 
     struct Rule {
         std::string name;
         std::string command;
+        std::string depfile;
+        std::string deps;
+        std::string msvc_deps_prefix;
         std::string description;
+        std::string generator;
+        std::string restat;
+        std::string rspfile;
+        std::string rspfile_content;
     };
 
     struct BuildTarget {
@@ -24,13 +43,11 @@ namespace CppCmake {
 
         void setVar(std::string &&key, std::string &&val);
 
-
         void setDefault(std::string &&def);
 
         void addRule(CppCmake::Rule &&rule);
 
         void addBuildTarget(CppCmake::BuildTarget &&build);
-
 
         NORETURN void build(int argc, char **argv);
 

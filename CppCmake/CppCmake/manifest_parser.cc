@@ -14,9 +14,9 @@
 
 #include "manifest_parser.h"
 
-#include <assert.h>
-#include <stdio.h>
-#include <stdlib.h>
+#include <cassert>
+#include <cstdio>
+#include <cstdlib>
 
 #include <vector>
 
@@ -63,7 +63,10 @@ bool ManifestParser::Parse(const string& filename, const string& input,
       EvalString let_value;
       if (!ParseLet(&name, &let_value, err))
         return false;
-      string value = let_value.Evaluate(env_);
+
+
+      string value;
+      value = let_value.Evaluate(env_);
       // Check ninja_required_version immediately so we can exit
       // before encountering any syntactic surprises.
       if (name == "ninja_required_version")
