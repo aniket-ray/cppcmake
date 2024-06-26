@@ -3,31 +3,37 @@
 
 #include <optional>
 
+using ExposedEvalString = std::pair<std::string, std::string>;
+using ExposedEvalStrings = std::vector<ExposedEvalString>;
+
 struct Populator {
   struct EnvRule {
     std::string name;
-    std::vector<std::pair<std::string, std::string>> command;
-    std::optional<std::vector<std::pair<std::string, std::string>>> depfile;
-    std::optional<std::vector<std::pair<std::string, std::string>>> deps;
-    std::optional<std::vector<std::pair<std::string, std::string>>> msvc_deps_prefix;
-    std::optional<std::vector<std::pair<std::string, std::string>>> description;
-    std::optional<std::vector<std::pair<std::string, std::string>>> generator;
-    std::optional<std::vector<std::pair<std::string, std::string>>> restat;
-    std::optional<std::vector<std::pair<std::string, std::string>>> rspfile;
-    std::optional<std::vector<std::pair<std::string, std::string>>> rspfile_content;
+    ExposedEvalStrings command;
+    std::optional<ExposedEvalStrings> depfile;
+    std::optional<ExposedEvalStrings> deps;
+    std::optional<ExposedEvalStrings> msvc_deps_prefix;
+    std::optional<ExposedEvalStrings> description;
+    std::optional<ExposedEvalStrings> generator;
+    std::optional<ExposedEvalStrings> restat;
+    std::optional<ExposedEvalStrings> rspfile;
+    std::optional<ExposedEvalStrings> rspfile_content;
   };
 
   BindingEnv* env_;
   explicit Populator(State* state);
-  bool addBinding(std::string key, std::vector<std::pair<std::string, std::string>> value);
+  bool addBinding(std::string key, ExposedEvalStrings value);
   [[nodiscard]] std::string getBinding(std::string key) const;
 
   bool addRule(Populator::EnvRule&& env_rule);
+  bool addBuildTarget(std::string rule_name, std::vector<ExposedEvalStrings> ins, std::vector<ExposedEvalStrings> outs, std::pair<std::string, ExposedEvalStrings> env_bindings
+                      //               ExposedEvalString context_vars
+  );
 };
 
 Populator::Populator(State* state) : env_{&state->bindings_} {}
 
-bool Populator::addBinding(std::string key, std::vector<std::pair<std::string, std::string>> value) {
+bool Populator::addBinding(std::string key, ExposedEvalStrings value) {
   std::vector<std::string> buffer;
 
   for (auto i = value.begin(); i != value.end(); i++) {
@@ -55,9 +61,7 @@ bool Populator::addRule(Populator::EnvRule&& env_rule) {
   }
 
   if (env_->LookupRuleCurrentScope(env_rule.name)) {
-     throw std::runtime_error(
-    (std::stringstream() << "duplicate rule '" << env_rule.name << "'").str()
-    );
+    throw std::runtime_error((std::stringstream() << "duplicate rule '" << env_rule.name << "'").str());
   }
 
   Rule* rule = new Rule(env_rule.name);
@@ -93,6 +97,8 @@ bool Populator::addRule(Populator::EnvRule&& env_rule) {
   return true;
 }
 
+//bool Populator::addBuildTarget(std::string rule_name, ExposedEvalStrings ins, ExposedEvalStrings outs) {}
+
 int main(int argc, char** argv) {
   CppCmake::Make make;
 
@@ -107,39 +113,50 @@ int main(int argc, char** argv) {
 
   populator.addRule({
       .name = "compile",
-      .command = std::vector<std::pair<std::string, std::string>>{{"g++", "RAW"}, {"-Itest/include", "RAW"}, {"-c", "RAW"}, {"in", "SPECIAL"}, {"-o", "RAW"}, {"out", "SPECIAL"}},
-      .depfile = std::vector<std::pair<std::string, std::string>>{{"out", "SPECIAL"}, {".d", "RAW"}},
-      .deps = std::vector<std::pair<std::string, std::string>>{{"gcc", "RAW"}},
-      .msvc_deps_prefix = std::vector<std::pair<std::string, std::string>>{{"Note:", "RAW"}},
-      .description = std::vector<std::pair<std::string, std::string>>{{"Compiling", "RAW"}, {"in", "SPECIAL"}, {"to", "RAW"}, {"out", "SPECIAL"}},
-      .generator = std::vector<std::pair<std::string, std::string>>{{"true", "RAW"}},
-      .restat = std::vector<std::pair<std::string, std::string>>{{"true", "RAW"}},
-      .rspfile = std::vector<std::pair<std::string, std::string>>{{"out", "SPECIAL"}, {".rsp", "RAW"}},
-      .rspfile_content = std::vector<std::pair<std::string, std::string>>{{"--input", "RAW"}, {"in", "SPECIAL"}, {"--output", "RAW"}, {"out", "RAW"}},
+      .command = ExposedEvalStrings{{"g++", "RAW"}, {"-Itest/include", "RAW"}, {"-c", "RAW"}, {"in", "SPECIAL"}, {"-o", "RAW"}, {"out", "SPECIAL"}},
+      .depfile = ExposedEvalStrings{{"out", "SPECIAL"}, {".d", "RAW"}},
+      .deps = ExposedEvalStrings{{"gcc", "RAW"}},
+      .msvc_deps_prefix = ExposedEvalStrings{{"Note:", "RAW"}},
+      .description = ExposedEvalStrings{{"Compiling", "RAW"}, {"in", "SPECIAL"}, {"to", "RAW"}, {"out", "SPECIAL"}},
+      .generator = ExposedEvalStrings{{"true", "RAW"}},
+      .restat = ExposedEvalStrings{{"true", "RAW"}},
+      .rspfile = ExposedEvalStrings{{"out", "SPECIAL"}, {".rsp", "RAW"}},
+      .rspfile_content = ExposedEvalStrings{{"--input", "RAW"}, {"in", "SPECIAL"}, {"--output", "RAW"}, {"out", "RAW"}},
   });
 
+//  populator.addBuildTarget("compile", {{{"src/hello.cpp", "RAW"}}, {{"include/add.h", "RAW"}}}, {{{"obj/hello.o", "RAW"}}});
 
+  /*
+     * build_location = src
+     *
+     * build hello.o : compile $build_location/hello.cpp
+    */
   make.setVar("cxx", "g++");
   make.setVar("cx", "$cxx random random2");
   make.setVar("cx1", "$cx");
   make.setVar("cflags", "-I./include -O2");
-  make.addRule({.name = "compile",
-                .command = "g++ -Itest/include -c $in -o $out",
-                .depfile = "$out.d",
-                .deps = "gcc",
-                .msvc_deps_prefix = "Note:",
-                .description = "Compiling $in to $out",
-                .generator = "true",
-                .restat = "true",
-                .rspfile = "$out.rsp",
-                .rspfile_content = "--input $in --output $out"});
+  make.setVar("sample_file", "src/hello.cpp");
+  make.setVar("src_path", "src");
 
-make.addRule({.name = "link", .command = "$cxx $in -o $out", .description = "Linking $out"});
-make.addBuildTarget({.src = "obj/hello.o", .target = "compile src/hello.cpp | include/add.h"});
-make.addBuildTarget({.src = "obj/add.o", .target = "compile src/add.cpp | include/add.h"});
-make.addBuildTarget({.src = "obj/main.o", .target = "compile src/main.cpp | include/add.h"});
-make.addBuildTarget({.src = "hello", .target = "link obj/hello.o obj/main.o obj/add.o"});
-make.setDefault("hello");
+  make.addRule({
+      .name = "compile",
+      .command = "g++ -Itest/include -c $in -o $out",
+      //                .depfile = "$out.d",
+      //                .deps = "gcc",
+      //                .msvc_deps_prefix = "Note:",
+      .description = "Compiling $in to $out",
+      //                .generator = "true",
+      //                .restat = "true",
+      //                .rspfile = "$out.rsp",
+      //                .rspfile_content = "--input $in --output $out"
+  });
+
+  make.addRule({.name = "link", .command = "$cxx $in -o $out", .description = "Linking $out"});
+  make.addBuildTarget({.src = "obj/hello.o", .target = "compile $sample_file | include/add.h\n  cxx = clang++"});
+  make.addBuildTarget({.src = "obj/add.o", .target = "compile  src/add.cpp | include/add.h"});
+  make.addBuildTarget({.src = "obj/main.o", .target = "compile src/main.cpp | include/add.h"});
+  make.addBuildTarget({.src = "hello", .target = "link obj/hello.o obj/main.o obj/add.o"});
+  make.setDefault("hello");
 
   make.build(argc, argv);
 }
