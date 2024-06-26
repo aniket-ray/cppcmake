@@ -1,7 +1,7 @@
 #include <numeric>
 #include "../CppCmake/CppCmake/backend.hpp"
 
-#include <format>
+#include <optional>
 
 struct Populator {
   struct EnvRule {
@@ -55,7 +55,9 @@ bool Populator::addRule(Populator::EnvRule&& env_rule) {
   }
 
   if (env_->LookupRuleCurrentScope(env_rule.name)) {
-    throw std::runtime_error(std::format("duplicate rule '{}'", env_rule.name));
+     throw std::runtime_error(
+    (std::stringstream() << "duplicate rule '" << env_rule.name << "'").str()
+    );
   }
 
   Rule* rule = new Rule(env_rule.name);
@@ -132,11 +134,12 @@ int main(int argc, char** argv) {
                 .rspfile = "$out.rsp",
                 .rspfile_content = "--input $in --output $out"});
 
-  make.addRule({.name = "link", .command = "$cxx $in -o $out", .description = "Linking $out"});
-  make.addBuildTarget({.src = "obj/hello.o", .target = "compile src/hello.cpp\n    cflags = -O3"});
-  make.addBuildTarget({.src = "obj/main.o", .target = "compile src/main.cpp"});
-  make.addBuildTarget({.src = "hello", .target = "link obj/hello.o obj/main.o"});
-  make.setDefault("hello");
+make.addRule({.name = "link", .command = "$cxx $in -o $out", .description = "Linking $out"});
+make.addBuildTarget({.src = "obj/hello.o", .target = "compile src/hello.cpp | include/add.h"});
+make.addBuildTarget({.src = "obj/add.o", .target = "compile src/add.cpp | include/add.h"});
+make.addBuildTarget({.src = "obj/main.o", .target = "compile src/main.cpp | include/add.h"});
+make.addBuildTarget({.src = "hello", .target = "link obj/hello.o obj/main.o obj/add.o"});
+make.setDefault("hello");
 
   make.build(argc, argv);
 }
